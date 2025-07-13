@@ -666,10 +666,10 @@ class AudioWaveformPlayerComponent extends Component {
 		this.animationFrame = requestAnimationFrame(() => this.updatePlayhead());
 	}
 
-	updateWaveformOpacity(playheadPosition) {
-		const waveformWidth = 447;
-		const barWidth = 2.235;
-		const currentBarIndex = Math.floor(playheadPosition / barWidth);
+        updateWaveformOpacity(playheadPosition) {
+                const waveformWidth = this.waveformContainer.offsetWidth;
+                const barWidth = waveformWidth / this.waveformBars.length;
+                const currentBarIndex = Math.floor(playheadPosition / barWidth);
 
 		this.waveformBars.forEach((bar, index) => {
 			if (index <= currentBarIndex) {
