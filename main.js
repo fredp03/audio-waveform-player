@@ -1,40 +1,6 @@
 const { Plugin, Component, TFile } = require('obsidian');
 
-// Import Rubber Band WASM library for high-quality time stretching
-let RubberBandModule = null;
-
-// Dynamically import the Rubber Band library
-async function loadRubberBand() {
-	if (!RubberBandModule) {
-		try {
-			console.log('Obsidian: Attempting to load Rubber Band WASM library...');
-			const modulePath = '@echogarden/rubberband-wasm/rubberband.js';
-			console.log(`Obsidian: Importing from: ${modulePath}`);
-			
-			const module = await import(modulePath);
-			console.log('Obsidian: Module imported successfully, type:', typeof module);
-			console.log('Obsidian: Module.default type:', typeof module.default);
-			console.log('Obsidian: Module keys:', Object.keys(module));
-			
-			if (typeof module.default === 'function') {
-				console.log('Obsidian: Calling module.default() to initialize WASM...');
-				RubberBandModule = await module.default();
-				console.log('Obsidian: Rubber Band WASM loaded successfully');
-				console.log('Obsidian: RubberBandModule type:', typeof RubberBandModule);
-				console.log('Obsidian: RubberBandModule keys:', Object.keys(RubberBandModule));
-			} else {
-				throw new Error(`Module.default is not a function, got: ${typeof module.default}`);
-			}
-		} catch (error) {
-			console.warn('Obsidian: Rubber Band WASM library loading failed:');
-			console.warn('Obsidian: Error name:', error.name);
-			console.warn('Obsidian: Error message:', error.message);
-			console.warn('Obsidian: Error stack:', error.stack);
-			console.warn('Obsidian: Make sure @echogarden/rubberband-wasm is properly installed');
-		}
-	}
-	return RubberBandModule;
-}
+// Time stretching now relies on the browser's native playbackRate feature
 
 class AudioWaveformPlayerComponent extends Component {
 	constructor(container, config, app) {
@@ -61,16 +27,7 @@ class AudioWaveformPlayerComponent extends Component {
 		this.playbackSpeed = 100; // Current playback speed percentage (40-125%)
 		this.isDraggingSpeedSlider = false; // Track if speed slider is being dragged
 		
-		// Rubber Band time stretching properties
-		this.rubberBandStretcher = null; // The Rubber Band stretcher instance
-		this.rubberBandModule = null; // The Rubber Band WASM module
-		this.stretchedAudioBuffer = null; // Cache for time-stretched audio
-		this.stretchedAudioUrl = null; // URL for stretched audio blob
-		this.currentTimeRatio = 1.0; // Current time stretch ratio (0.4 to 1.25)
-		this.currentPitchRatio = 1.0; // Current pitch ratio (always 1.0 for pitch preservation)
-		this.isTimeStretchingEnabled = false; // Track if time stretching is active
-		this.originalAudioBuffer = null; // Store original audio buffer for time stretching
-		this.originalAudioBuffer = null; // Store original unprocessed audio buffer
+                // Simple time stretching using playbackRate
 	}
 
 	async render() {
@@ -467,84 +424,13 @@ class AudioWaveformPlayerComponent extends Component {
 	async loadAudioData() {
 		try {
 			this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-			await this.loadAudioForWaveform();
-			
-			// Initialize Rubber Band stretcher after loading audio data
-			await this.initializeRubberBand();
+                        await this.loadAudioForWaveform();
 		} catch (error) {
 			console.error('Error loading audio for waveform:', error);
 		}
 	}
 
-	// Initialize the Rubber Band stretcher (following the video's approach)
-	async initializeRubberBand() {
-		try {
-			const RubberBandModule = await loadRubberBand();
-			if (!RubberBandModule || !this.audioBuffer) {
-				console.warn('Rubber Band module or audio buffer not available');
-				return;
-			}
-
-			// Get audio properties
-			const sampleRate = this.audioBuffer.sampleRate || 44100;
-			const channels = this.audioBuffer.numberOfChannels || 2;
-
-			console.log(`Initializing Rubber Band with sample rate: ${sampleRate}, channels: ${channels}`);
-
-			// Create a new Rubber Band stretcher instance using C API
-			// Options constants from Rubber Band documentation
-			const OptionProcessOffline = 0x00000000;
-			const OptionStretchPrecise = 0x00000010;
-			const OptionTransientsMixed = 0x00000100;
-			const OptionDetectorCompound = 0x00000000;
-			const OptionPhaseLaminar = 0x00000000;
-			const OptionWindowStandard = 0x00000000;
-			const OptionSmoothingOn = 0x00800000;
-			const OptionFormantPreserved = 0x01000000;
-			const OptionPitchHighQuality = 0x02000000;
-			const OptionChannelsTogether = 0x10000000;
-
-			// Use high-quality offline processing options
-			const options = OptionProcessOffline | 
-						  OptionStretchPrecise | 
-						  OptionTransientsMixed | 
-						  OptionDetectorCompound | 
-						  OptionPhaseLaminar | 
-						  OptionWindowStandard | 
-						  OptionSmoothingOn | 
-						  OptionFormantPreserved | 
-						  OptionPitchHighQuality | 
-						  OptionChannelsTogether;
-
-			this.rubberBandStretcher = RubberBandModule._rubberband_new(
-				sampleRate,
-				channels,
-				options,
-				1.0, // initial time ratio
-				1.0  // initial pitch ratio
-			);
-
-			if (this.rubberBandStretcher === 0) {
-				console.error('Failed to create Rubber Band stretcher');
-				return;
-			}
-
-			// Store the original audio buffer for processing and module reference
-			this.originalAudioBuffer = this.audioBuffer;
-			this.rubberBandModule = RubberBandModule;
-			this.isTimeStretchingEnabled = true;
-
-			console.log('Rubber Band stretcher initialized successfully');
-			
-			// Note: Time stretching will only be applied when speed !== 100%
-			console.log('Time stretching available - will be applied when speed is not 100%');
-		} catch (error) {
-			console.error('Error initializing Rubber Band:', error);
-			this.isTimeStretchingEnabled = false;
-		}
-	}
-
-	async loadAudioForWaveform() {
+        async loadAudioForWaveform() {
 		return new Promise((resolve) => {
 			const xhr = new XMLHttpRequest();
 			xhr.open('GET', this.currentAudio.src, true);
@@ -555,8 +441,6 @@ class AudioWaveformPlayerComponent extends Component {
 					try {
 						if (this.audioContext) {
 							this.audioBuffer = await this.audioContext.decodeAudioData(xhr.response);
-							// Store original buffer for time stretching
-							this.originalAudioBuffer = this.audioBuffer;
 							this.waveformData = this.audioBuffer.getChannelData(0);
 						}
 						resolve();
@@ -898,355 +782,19 @@ class AudioWaveformPlayerComponent extends Component {
 		this.updateSpeedSliderPosition();
 		this.updateSpeedIndicator();
 		
-		// Apply time stretching
-		this.updateTimeStretching();
-	}
+        // Apply time stretching
+                this.updateTimeStretching();
+        }
 
-	// Process audio through Rubber Band (using the C API)
-	async processTimeStretching(timeRatio, pitchRatio = 1.0) {
-		console.log(`processTimeStretching: timeRatio=${timeRatio}, channels=${this.originalAudioBuffer.numberOfChannels}, length=${this.originalAudioBuffer.length}`);
-		
-		if (!this.rubberBandModule || !this.rubberBandStretcher || !this.originalAudioBuffer) {
-			console.error('Rubber Band module, stretcher, or audio buffer not available');
-			return null;
-		}
-
-		try {
-			const channels = this.originalAudioBuffer.numberOfChannels;
-			const sampleRate = this.originalAudioBuffer.sampleRate;
-			const inputLength = this.originalAudioBuffer.length;
-			
-			console.log(`Setting time ratio to ${timeRatio} and pitch scale to ${pitchRatio}`);
-			
-			// Set the time ratio and pitch scale
-			this.rubberBandModule._rubberband_set_time_ratio(this.rubberBandStretcher, timeRatio);
-			this.rubberBandModule._rubberband_set_pitch_scale(this.rubberBandStretcher, pitchRatio);
-			
-			// Calculate expected output length
-			const outputLength = Math.ceil(inputLength * timeRatio);
-			
-			console.log(`Input length: ${inputLength}, Output length: ${outputLength}`);
-			
-			// Prepare input data
-			const inputData = [];
-			for (let c = 0; c < channels; c++) {
-				inputData.push(this.originalAudioBuffer.getChannelData(c));
-			}
-			
-			console.log('Allocating WASM memory...');
-			
-			// Allocate memory for input data (separate allocation for each channel)
-			const inputPtrs = this.rubberBandModule._malloc(channels * 4); // Array of pointers
-			const inputChannelPtrs = [];
-			
-			for (let c = 0; c < channels; c++) {
-				const channelPtr = this.rubberBandModule._malloc(inputLength * 4); // 4 bytes per float
-				inputChannelPtrs.push(channelPtr);
-				this.rubberBandModule.HEAPU32[inputPtrs / 4 + c] = channelPtr;
-				
-				// Copy channel data to WASM memory
-				console.log(`Copying channel ${c} data to WASM memory...`);
-				for (let i = 0; i < inputLength; i++) {
-					this.rubberBandModule.HEAPF32[channelPtr / 4 + i] = inputData[c][i];
-				}
-			}
-			
-			// Allocate memory for output data
-			const outputPtrs = this.rubberBandModule._malloc(channels * 4); // Array of pointers
-			const outputChannelPtrs = [];
-			
-			for (let c = 0; c < channels; c++) {
-				const channelPtr = this.rubberBandModule._malloc(outputLength * 4); // 4 bytes per float
-				outputChannelPtrs.push(channelPtr);
-				this.rubberBandModule.HEAPU32[outputPtrs / 4 + c] = channelPtr;
-			}
-			
-			console.log('Processing audio with Rubber Band...');
-			
-			try {
-				// Process the audio
-				this.rubberBandModule._rubberband_process(this.rubberBandStretcher, inputPtrs, inputLength, 1);
-				
-				// Get available output samples
-				const available = this.rubberBandModule._rubberband_available(this.rubberBandStretcher);
-				console.log(`Available output samples: ${available}`);
-				
-				if (available > 0) {
-					// Retrieve the processed audio
-					const retrieved = this.rubberBandModule._rubberband_retrieve(this.rubberBandStretcher, outputPtrs, Math.min(available, outputLength));
-					console.log(`Retrieved samples: ${retrieved}`);
-					
-					if (retrieved > 0) {
-						console.log('Creating output AudioBuffer...');
-						
-						// Create output AudioBuffer
-						const outputBuffer = this.audioContext.createBuffer(channels, retrieved, sampleRate);
-						
-						console.log('Copying processed data from WASM memory...');
-						
-						// Copy output data from WASM memory
-						for (let c = 0; c < channels; c++) {
-							try {
-								const outputChannelData = outputBuffer.getChannelData(c);
-								const channelPtr = outputChannelPtrs[c];
-								
-								console.log(`Copying channel ${c} data (${retrieved} samples)...`);
-								
-								for (let i = 0; i < retrieved; i++) {
-									const sample = this.rubberBandModule.HEAPF32[channelPtr / 4 + i];
-									
-									// Validate sample value
-									if (isNaN(sample) || !isFinite(sample)) {
-										console.warn(`Invalid sample at channel ${c}, index ${i}: ${sample}`);
-										outputChannelData[i] = 0;
-									} else {
-										// Clamp to valid audio range
-										outputChannelData[i] = Math.max(-1, Math.min(1, sample));
-									}
-								}
-								
-								console.log(`Channel ${c} copied successfully`);
-								
-							} catch (channelError) {
-								console.error(`Error copying channel ${c}:`, channelError);
-								console.error('Channel error name:', channelError.name);
-								console.error('Channel error message:', channelError.message);
-								throw channelError;
-							}
-						}
-						
-						console.log('Time stretching completed successfully');
-						this.stretchedAudioBuffer = outputBuffer;
-						return outputBuffer;
-						
-					} else {
-						console.warn('No samples were retrieved from Rubber Band');
-						return null;
-					}
-				} else {
-					console.warn('No output samples available from Rubber Band');
-					return null;
-				}
-				
-			} finally {
-				// Clean up allocated memory
-				console.log('Cleaning up WASM memory...');
-				
-				// Free input channel memory
-				for (let c = 0; c < inputChannelPtrs.length; c++) {
-					this.rubberBandModule._free(inputChannelPtrs[c]);
-				}
-				this.rubberBandModule._free(inputPtrs);
-				
-				// Free output channel memory
-				for (let c = 0; c < outputChannelPtrs.length; c++) {
-					this.rubberBandModule._free(outputChannelPtrs[c]);
-				}
-				this.rubberBandModule._free(outputPtrs);
-				
-				console.log('Memory cleanup completed');
-			}
-			
-		} catch (error) {
-			console.error('Error in processTimeStretching:');
-			console.error('Error name:', error.name);
-			console.error('Error message:', error.message);
-			console.error('Error stack:', error.stack);
-			
-			// Additional debugging info
-			console.error('AudioContext state:', this.audioContext ? this.audioContext.state : 'null');
-			console.error('Original buffer info:', {
-				channels: this.originalAudioBuffer.numberOfChannels,
-				length: this.originalAudioBuffer.length,
-				sampleRate: this.originalAudioBuffer.sampleRate,
-				duration: this.originalAudioBuffer.duration
-			});
-			
-			return null;
-		}
-	}
-
-	// Update time stretching when speed changes (integrate with existing speed slider)
-	async updateTimeStretching() {
-		console.log(`updateTimeStretching called: speed=${this.playbackSpeed}%, enabled=${this.isTimeStretchingEnabled}, hasBuffer=${!!this.originalAudioBuffer}, hasStretcher=${!!this.rubberBandStretcher}`);
-		
-		if (!this.isTimeStretchingEnabled || !this.originalAudioBuffer || !this.rubberBandStretcher) {
-			console.log('Time stretching not enabled or components not available');
-			return;
-		}
-
-		// Check if we're at 100% speed - no time stretching needed
-		if (this.playbackSpeed === 100) {
-			console.log('Speed at 100% - disabling time stretching, using original audio');
-			await this.restoreOriginalAudio();
-			return;
-		}
-
-		// Convert percentage to ratio (40% = 0.4, 125% = 1.25)
-		const timeRatio = this.playbackSpeed / 100;
-		
-		// Store current time ratio for reference
-		this.currentTimeRatio = timeRatio;
-
-		// Process the audio with new time ratio
-		console.log(`Processing time stretching with ratio: ${timeRatio} (${this.playbackSpeed}%)`);
-		
-		try {
-			const stretchedBuffer = await this.processTimeStretching(timeRatio);
-			
-			if (stretchedBuffer) {
-				// Update both audio elements with the time-stretched audio
-				await this.updateAudioElementsWithStretchedBuffer(stretchedBuffer);
-				console.log('Time stretching applied successfully');
-			} else {
-				console.warn('Failed to apply time stretching');
-			}
-		} catch (error) {
-			console.error('Error applying time stretching:', error);
-		}
-	}
-
-	// Restore original audio when time stretching is not needed (speed = 100%)
-	async restoreOriginalAudio() {
-		try {
-			// Store current playback position
-			const currentTime = this.currentAudio.currentTime;
-			const wasPlaying = !this.currentAudio.paused;
-
-			// Get the appropriate original audio path based on current guitar state
-			const originalPath = this.hasGuitar ? this.guitarVersion : this.noGuitarVersion;
-
-			// Restore both audio elements to original sources
-			this.primaryAudio.src = originalPath;
-			this.secondaryAudio.src = originalPath;
-
-			// Wait for audio to load
-			await Promise.all([
-				new Promise(resolve => {
-					this.primaryAudio.addEventListener('loadeddata', resolve, { once: true });
-				}),
-				new Promise(resolve => {
-					this.secondaryAudio.addEventListener('loadeddata', resolve, { once: true });
-				})
-			]);
-
-			// Restore playback position (no time adjustment needed for 100% speed)
-			this.primaryAudio.currentTime = currentTime;
-			this.secondaryAudio.currentTime = currentTime;
-
-			// Resume playback if it was playing
-			if (wasPlaying) {
-				await this.currentAudio.play();
-			}
-
-			// Clean up stretched audio URL if it exists
-			if (this.stretchedAudioUrl) {
-				URL.revokeObjectURL(this.stretchedAudioUrl);
-				this.stretchedAudioUrl = null;
-			}
-
-			console.log('Restored original audio for 100% speed');
-
-		} catch (error) {
-			console.error('Error restoring original audio:', error);
-		}
-	}
-
-	// Update audio elements with the stretched buffer
-	async updateAudioElementsWithStretchedBuffer(stretchedBuffer) {
-		try {
-			// Convert AudioBuffer to blob for both audio elements
-			const wavBlob = await this.audioBufferToWav(stretchedBuffer);
-			const audioUrl = URL.createObjectURL(wavBlob);
-
-			// Store current playback position
-			const currentTime = this.currentAudio.currentTime;
-			const wasPlaying = !this.currentAudio.paused;
-
-			// Update both audio elements with stretched audio
-			this.primaryAudio.src = audioUrl;
-			this.secondaryAudio.src = audioUrl;
-
-			// Wait for audio to load
-			await Promise.all([
-				new Promise(resolve => {
-					this.primaryAudio.addEventListener('loadeddata', resolve, { once: true });
-				}),
-				new Promise(resolve => {
-					this.secondaryAudio.addEventListener('loadeddata', resolve, { once: true });
-				})
-			]);
-
-			// Restore playback position (adjusted for time stretching)
-			const adjustedTime = currentTime / this.currentTimeRatio;
-			this.primaryAudio.currentTime = adjustedTime;
-			this.secondaryAudio.currentTime = adjustedTime;
-
-			// Resume playback if it was playing
-			if (wasPlaying) {
-				await this.currentAudio.play();
-			}
-
-			// Clean up old URL if exists
-			if (this.stretchedAudioUrl) {
-				URL.revokeObjectURL(this.stretchedAudioUrl);
-			}
-			this.stretchedAudioUrl = audioUrl;
-
-		} catch (error) {
-			console.error('Error updating audio elements with stretched buffer:', error);
-		}
-	}
-
-	// Convert AudioBuffer to WAV blob (helper for audio element playback)
-	async audioBufferToWav(buffer) {
-		// Following standard WAV encoding for web audio
-		const length = buffer.length;
-		const numberOfChannels = buffer.numberOfChannels;
-		const sampleRate = buffer.sampleRate;
-		const bytesPerSample = 2; // 16-bit
-		const blockAlign = numberOfChannels * bytesPerSample;
-		const byteRate = sampleRate * blockAlign;
-		const dataSize = length * blockAlign;
-		const bufferSize = 44 + dataSize; // WAV header is 44 bytes
-
-		const arrayBuffer = new ArrayBuffer(bufferSize);
-		const view = new DataView(arrayBuffer);
-
-		// WAV header
-		let offset = 0;
-		
-		// RIFF chunk descriptor
-		view.setUint32(offset, 0x52494646, false); offset += 4; // "RIFF"
-		view.setUint32(offset, bufferSize - 8, true); offset += 4; // File size - 8
-		view.setUint32(offset, 0x57415645, false); offset += 4; // "WAVE"
-
-		// fmt sub-chunk
-		view.setUint32(offset, 0x666d7420, false); offset += 4; // "fmt "
-		view.setUint32(offset, 16, true); offset += 4; // Sub-chunk size
-		view.setUint16(offset, 1, true); offset += 2; // Audio format (PCM)
-		view.setUint16(offset, numberOfChannels, true); offset += 2; // Number of channels
-		view.setUint32(offset, sampleRate, true); offset += 4; // Sample rate
-		view.setUint32(offset, byteRate, true); offset += 4; // Byte rate
-		view.setUint16(offset, blockAlign, true); offset += 2; // Block align
-		view.setUint16(offset, 16, true); offset += 2; // Bits per sample
-
-		// data sub-chunk
-		view.setUint32(offset, 0x64617461, false); offset += 4; // "data"
-		view.setUint32(offset, dataSize, true); offset += 4; // Data size
-
-		// Convert float samples to 16-bit PCM
-		for (let i = 0; i < length; i++) {
-			for (let channel = 0; channel < numberOfChannels; channel++) {
-				const sample = Math.max(-1, Math.min(1, buffer.getChannelData(channel)[i]));
-				const intSample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
-				view.setInt16(offset, intSample, true);
-				offset += 2;
-			}
-		}
-
-		return new Blob([arrayBuffer], { type: 'audio/wav' });
-	}
+        updateTimeStretching() {
+                const rate = this.playbackSpeed / 100;
+                [this.primaryAudio, this.secondaryAudio].forEach(audio => {
+                        audio.playbackRate = rate;
+                        if ('preservesPitch' in audio) audio.preservesPitch = true;
+                        if ('mozPreservesPitch' in audio) audio.mozPreservesPitch = true;
+                        if ('webkitPreservesPitch' in audio) audio.webkitPreservesPitch = true;
+                });
+        }
 }
 
 class AudioWaveformPlayerPlugin extends Plugin {

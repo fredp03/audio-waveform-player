@@ -113,7 +113,7 @@
                 <li>Select an audio file below (MP3, WAV, etc.)</li>
                 <li>The player will load and show the waveform</li>
                 <li>Click the speed icon to show the speed slider</li>
-                <li>Move the speed slider to test Rubber Band time stretching</li>
+                <li>Move the speed slider to change playback speed</li>
                 <li>Check the console output below for debugging info</li>
             </ol>
             <p><strong>Note:</strong> Make sure your audio files are named with "-guitar" or "-no-guitar" patterns for the guitar switching feature to work properly.</p>
@@ -200,177 +200,8 @@
         console.warn = (...args) => addToConsole('warn', ...args);
         console.error = (...args) => addToConsole('error', ...args);
 
-        // Import Rubber Band WASM library for high-quality time stretching
-        let RubberBandModule = null;
-
-        // Dynamically import the Rubber Band library
-        async function loadRubberBand() {
-            if (!RubberBandModule) {
-                console.log('Attempting to load Rubber Band WASM library...');
-                
-                // Method 1: Try loading local files directly
-                try {
-                    console.log('Method 1: Trying to load local rubberband.js file...');
-                    
-                    // Try different local paths
-                    const localPaths = [
-                        './node_modules/@echogarden/rubberband-wasm/rubberband.js',
-                        'http://localhost:8080/node_modules/@echogarden/rubberband-wasm/rubberband.js',
-                        '/node_modules/@echogarden/rubberband-wasm/rubberband.js'
-                    ];
-                    
-                    let module = null;
-                    let lastError = null;
-                    
-                    for (const path of localPaths) {
-                        try {
-                            console.log(`Attempting to import: ${path}`);
-                            module = await import(path);
-                            console.log(`Successfully imported from: ${path}`);
-                            break;
-                        } catch (pathError) {
-                            console.log(`Failed to import from ${path}:`, pathError.message);
-                            lastError = pathError;
-                        }
-                    }
-                    
-                    if (!module) {
-                        throw lastError || new Error('All local paths failed');
-                    }
-                    
-                    console.log('Local module imported successfully, module:', module);
-                    console.log('Module.default type:', typeof module.default);
-                    
-                    if (typeof module.default === 'function') {
-                        console.log('Calling module.default() to initialize WASM...');
-                        RubberBandModule = await module.default();
-                        console.log('Rubber Band WASM initialized from local files successfully');
-                        console.log('RubberBandModule type:', typeof RubberBandModule);
-                        console.log('RubberBandModule keys:', Object.keys(RubberBandModule));
-                        return RubberBandModule;
-                    } else {
-                        throw new Error(`Module.default is not a function, got: ${typeof module.default}`);
-                    }
-                } catch (localError) {
-                    console.warn('Method 1 failed - Could not load Rubber Band locally:');
-                    console.warn('Error name:', localError.name);
-                    console.warn('Error message:', localError.message);
-                    console.warn('Error stack:', localError.stack);
-                    
-                    // Method 2: Try CDN with fetch
-                    try {
-                        console.log('Method 2: Trying CDN with fetch...');
-                        const cdnUrl = 'https://cdn.jsdelivr.net/npm/@echogarden/rubberband-wasm@0.2.0/rubberband.js';
-                        console.log(`Fetching from CDN: ${cdnUrl}`);
-                        
-                        const response = await fetch(cdnUrl);
-                        console.log('CDN response status:', response.status);
-                        console.log('CDN response headers:', [...response.headers.entries()]);
-                        
-                        if (!response.ok) {
-                            throw new Error(`CDN fetch failed with status ${response.status}: ${response.statusText}`);
-                        }
-                        
-                        const moduleText = await response.text();
-                        console.log('CDN module text length:', moduleText.length);
-                        console.log('CDN module text start:', moduleText.substring(0, 200));
-                        
-                        const blob = new Blob([moduleText], { type: 'application/javascript' });
-                        const moduleUrl = URL.createObjectURL(blob);
-                        console.log('Created blob URL:', moduleUrl);
-                        
-                        const module = await import(moduleUrl);
-                        console.log('CDN module imported, module:', module);
-                        console.log('CDN Module.default type:', typeof module.default);
-                        
-                        URL.revokeObjectURL(moduleUrl);
-                        
-                        if (typeof module.default === 'function') {
-                            console.log('Calling CDN module.default() to initialize WASM...');
-                            RubberBandModule = await module.default();
-                            console.log('Rubber Band WASM loaded from CDN successfully');
-                            console.log('CDN RubberBandModule type:', typeof RubberBandModule);
-                            console.log('CDN RubberBandModule keys:', Object.keys(RubberBandModule));
-                            return RubberBandModule;
-                        } else {
-                            throw new Error(`CDN Module.default is not a function, got: ${typeof module.default}`);
-                        }
-                    } catch (cdnError) {
-                        console.error('Method 2 failed - Could not load Rubber Band from CDN:');
-                        console.error('CDN Error name:', cdnError.name);
-                        console.error('CDN Error message:', cdnError.message);
-                        console.error('CDN Error stack:', cdnError.stack);
-                        
-                        // Method 3: Try direct script tag approach
-                        try {
-                            console.log('Method 3: Trying direct script tag approach...');
-                            return await loadRubberBandViaScript();
-                        } catch (scriptError) {
-                            console.error('Method 3 failed - Script tag approach failed:');
-                            console.error('Script Error name:', scriptError.name);
-                            console.error('Script Error message:', scriptError.message);
-                            console.error('Script Error stack:', scriptError.stack);
-                            
-                            console.error('All methods failed. Final error summary:');
-                            console.error('1. Local import error:', localError.message);
-                            console.error('2. CDN fetch error:', cdnError.message);
-                            console.error('3. Script tag error:', scriptError.message);
-                        }
-                    }
-                }
-            }
-            return RubberBandModule;
-        }
-
-        // Alternative loading method using script tag
-        function loadRubberBandViaScript() {
-            return new Promise((resolve, reject) => {
-                console.log('Creating script tag for Rubber Band...');
-                const script = document.createElement('script');
-                script.type = 'module';
-                script.textContent = `
-                    import Rubberband from 'https://cdn.jsdelivr.net/npm/@echogarden/rubberband-wasm@0.2.0/rubberband.js';
-                    
-                    (async () => {
-                        try {
-                            console.log('Script tag: Initializing Rubber Band...');
-                            const module = await Rubberband();
-                            console.log('Script tag: Rubber Band initialized');
-                            window.RubberBandModuleGlobal = module;
-                            window.dispatchEvent(new CustomEvent('rubberband-loaded'));
-                        } catch (error) {
-                            console.error('Script tag: Error initializing Rubber Band:', error);
-                            window.dispatchEvent(new CustomEvent('rubberband-error', { detail: error }));
-                        }
-                    })();
-                `;
-                
-                document.head.appendChild(script);
-                
-                const timeout = setTimeout(() => {
-                    reject(new Error('Script tag loading timeout after 10 seconds'));
-                }, 10000);
-                
-                window.addEventListener('rubberband-loaded', () => {
-                    clearTimeout(timeout);
-                    console.log('Script tag method succeeded');
-                    RubberBandModule = window.RubberBandModuleGlobal;
-                    resolve(RubberBandModule);
-                }, { once: true });
-                
-                window.addEventListener('rubberband-error', (event) => {
-                    clearTimeout(timeout);
-                    reject(new Error(`Script tag method failed: ${event.detail.message}`));
-                }, { once: true });
-                
-                script.onerror = (error) => {
-                    clearTimeout(timeout);
-                    reject(new Error(`Script tag failed to load: ${error.message || 'Unknown error'}`));
-                };
-            });
-        }
-
-        // Audio Player Component (simplified for browser)
+        
+            // Audio Player Component (simplified for browser)
         class AudioWaveformPlayerComponent extends Component {
             constructor(container, config, app) {
                 super();
@@ -396,14 +227,7 @@
                 this.playbackSpeed = 100;
                 this.isDraggingSpeedSlider = false;
                 
-                // Rubber Band time stretching properties
-                this.rubberBandModule = null;
-                this.stretchedAudioBuffer = null;
-                this.stretchedAudioUrl = null;
-                this.currentTimeRatio = 1.0;
-                this.currentPitchRatio = 1.0;
-                this.isTimeStretchingEnabled = false;
-                this.originalAudioBuffer = null;
+                // Simple time stretching using playbackRate
             }
 
             async render() {
@@ -553,7 +377,6 @@
                 try {
                     this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
                     await this.loadAudioForWaveform();
-                    await this.initializeRubberBand();
                 } catch (error) {
                     console.error('Error loading audio for waveform:', error);
                 }
@@ -570,7 +393,6 @@
                             try {
                                 if (this.audioContext) {
                                     this.audioBuffer = await this.audioContext.decodeAudioData(xhr.response);
-                                    this.originalAudioBuffer = this.audioBuffer;
                                     this.waveformData = this.audioBuffer.getChannelData(0);
                                 }
                                 resolve();
@@ -588,26 +410,6 @@
                 });
             }
 
-            async initializeRubberBand() {
-                try {
-                    const RubberBandModule = await loadRubberBand();
-                    if (!RubberBandModule || !this.audioBuffer) {
-                        console.warn('Rubber Band module or audio buffer not available');
-                        return;
-                    }
-
-                    console.log('Rubber Band module loaded successfully for time stretching');
-
-                    this.originalAudioBuffer = this.audioBuffer;
-                    this.isTimeStretchingEnabled = true;
-                    this.rubberBandModule = RubberBandModule;
-
-                    console.log('Time stretching available - will be applied when speed is not 100%');
-                } catch (error) {
-                    console.error('Error initializing Rubber Band:', error);
-                    this.isTimeStretchingEnabled = false;
-                }
-            }
 
             generateWaveform() {
                 if (!this.waveformData) return;
@@ -700,296 +502,14 @@
                 }
             }
 
-            // Time stretching methods
-            async updateTimeStretching() {
-                console.log(`updateTimeStretching called: speed=${this.playbackSpeed}%, enabled=${this.isTimeStretchingEnabled}, hasBuffer=${!!this.originalAudioBuffer}, hasModule=${!!this.rubberBandModule}`);
-                
-                if (!this.isTimeStretchingEnabled || !this.originalAudioBuffer || !this.rubberBandModule) {
-                    console.log('Time stretching not enabled or components not available');
-                    return;
-                }
-
-                if (this.playbackSpeed === 100) {
-                    console.log('Speed at 100% - using original audio');
-                    this.currentAudio.src = this.primaryAudio.src;
-                    return;
-                }
-
-                const timeRatio = this.playbackSpeed / 100;
-                console.log(`Processing time stretching with ratio: ${timeRatio} (${this.playbackSpeed}%)`);
-                
-                try {
-                    const stretchedBuffer = await this.processTimeStretching(this.originalAudioBuffer, timeRatio);
-                    if (stretchedBuffer) {
-                        const wavData = this.audioBufferToWav(stretchedBuffer);
-                        const blob = new Blob([wavData], { type: 'audio/wav' });
-                        
-                        // Clean up previous URL
-                        if (this.stretchedAudioUrl) {
-                            URL.revokeObjectURL(this.stretchedAudioUrl);
-                        }
-                        
-                        this.stretchedAudioUrl = URL.createObjectURL(blob);
-                        this.currentAudio.src = this.stretchedAudioUrl;
-                        
-                        console.log('Time stretching applied successfully');
-                    }
-                } catch (error) {
-                    console.error('Error applying time stretching:', error);
-                }
-            }
-
-            async processTimeStretching(audioBuffer, timeRatio) {
-                console.log(`processTimeStretching: timeRatio=${timeRatio}, channels=${audioBuffer.numberOfChannels}, length=${audioBuffer.length}`);
-                
-                if (!this.rubberBandModule) {
-                    console.error('Rubber Band module not available');
-                    return null;
-                }
-
-                try {
-                    const channels = audioBuffer.numberOfChannels;
-                    const sampleRate = audioBuffer.sampleRate;
-                    const inputLength = audioBuffer.length;
-                    
-                    console.log('Creating new Rubber Band stretcher instance...');
-                    
-                    // Create a fresh stretcher instance for each operation
-                    const OptionProcessOffline = 0x00000000;
-                    const OptionStretchPrecise = 0x00000010;
-                    const OptionTransientsMixed = 0x00000100;
-                    const OptionDetectorCompound = 0x00000000;
-                    const OptionPhaseLaminar = 0x00000000;
-                    const OptionWindowStandard = 0x00000000;
-                    const OptionSmoothingOn = 0x00800000;
-                    const OptionFormantPreserved = 0x01000000;
-                    const OptionPitchHighQuality = 0x02000000;
-                    const OptionChannelsTogether = 0x10000000;
-
-                    const options = OptionProcessOffline | 
-                                  OptionStretchPrecise | 
-                                  OptionTransientsMixed | 
-                                  OptionDetectorCompound | 
-                                  OptionPhaseLaminar | 
-                                  OptionWindowStandard | 
-                                  OptionSmoothingOn | 
-                                  OptionFormantPreserved | 
-                                  OptionPitchHighQuality | 
-                                  OptionChannelsTogether;
-
-                    const stretcher = this.rubberBandModule._rubberband_new(
-                        sampleRate,
-                        channels,
-                        options,
-                        timeRatio,
-                        1.0  // pitch ratio
-                    );
-
-                    if (stretcher === 0) {
-                        console.error('Failed to create new Rubber Band stretcher');
-                        return null;
-                    }
-                    
-                    console.log(`Created stretcher with time ratio: ${timeRatio} and pitch scale: 1.0`);
-                    
-                    // Calculate expected output length
-                    const outputLength = Math.ceil(inputLength * timeRatio);
-                    
-                    console.log(`Input length: ${inputLength}, Output length: ${outputLength}`);
-                    
-                    // Prepare input data
-                    const inputData = [];
-                    for (let c = 0; c < channels; c++) {
-                        inputData.push(audioBuffer.getChannelData(c));
-                    }
-                    
-                    console.log('Allocating WASM memory...');
-                    
-                    // Allocate memory for input data (separate allocation for each channel)
-                    const inputPtrs = this.rubberBandModule._malloc(channels * 4); // Array of pointers
-                    const inputChannelPtrs = [];
-                    
-                    for (let c = 0; c < channels; c++) {
-                        const channelPtr = this.rubberBandModule._malloc(inputLength * 4); // 4 bytes per float
-                        inputChannelPtrs.push(channelPtr);
-                        this.rubberBandModule.HEAPU32[inputPtrs / 4 + c] = channelPtr;
-                        
-                        // Copy channel data to WASM memory
-                        console.log(`Copying channel ${c} data to WASM memory...`);
-                        for (let i = 0; i < inputLength; i++) {
-                            this.rubberBandModule.HEAPF32[channelPtr / 4 + i] = inputData[c][i];
-                        }
-                    }
-                    
-                    // Allocate memory for output data
-                    const outputPtrs = this.rubberBandModule._malloc(channels * 4); // Array of pointers
-                    const outputChannelPtrs = [];
-                    
-                    for (let c = 0; c < channels; c++) {
-                        const channelPtr = this.rubberBandModule._malloc(outputLength * 4); // 4 bytes per float
-                        outputChannelPtrs.push(channelPtr);
-                        this.rubberBandModule.HEAPU32[outputPtrs / 4 + c] = channelPtr;
-                    }
-                    
-                    console.log('Processing audio with Rubber Band...');
-                    
-                    try {
-                        // Process the audio
-                        this.rubberBandModule._rubberband_process(stretcher, inputPtrs, inputLength, 1);
-                        
-                        // Get available output samples
-                        const available = this.rubberBandModule._rubberband_available(stretcher);
-                        console.log(`Available output samples: ${available}`);
-                        
-                        if (available > 0) {
-                            // Retrieve the processed audio
-                            const retrieved = this.rubberBandModule._rubberband_retrieve(stretcher, outputPtrs, Math.min(available, outputLength));
-                            console.log(`Retrieved samples: ${retrieved}`);
-                            
-                            if (retrieved > 0) {
-                                console.log('Creating output AudioBuffer...');
-                                
-                                // Create output AudioBuffer
-                                const outputBuffer = this.audioContext.createBuffer(channels, retrieved, sampleRate);
-                                
-                                console.log('Copying processed data from WASM memory...');
-                                
-                                // Copy output data from WASM memory
-                                for (let c = 0; c < channels; c++) {
-                                    try {
-                                        const outputChannelData = outputBuffer.getChannelData(c);
-                                        const channelPtr = outputChannelPtrs[c];
-                                        
-                                        console.log(`Copying channel ${c} data (${retrieved} samples)...`);
-                                        
-                                        for (let i = 0; i < retrieved; i++) {
-                                            const sample = this.rubberBandModule.HEAPF32[channelPtr / 4 + i];
-                                            
-                                            // Validate sample value
-                                            if (isNaN(sample) || !isFinite(sample)) {
-                                                console.warn(`Invalid sample at channel ${c}, index ${i}: ${sample}`);
-                                                outputChannelData[i] = 0;
-                                            } else {
-                                                // Clamp to valid audio range
-                                                outputChannelData[i] = Math.max(-1, Math.min(1, sample));
-                                            }
-                                        }
-                                        
-                                        console.log(`Channel ${c} copied successfully`);
-                                        
-                                    } catch (channelError) {
-                                        console.error(`Error copying channel ${c}:`, channelError);
-                                        console.error('Channel error name:', channelError.name);
-                                        console.error('Channel error message:', channelError.message);
-                                        console.error('Channel error stack:', channelError.stack);
-                                        throw channelError;
-                                    }
-                                }
-                                
-                                console.log('Time stretching completed successfully');
-                                return outputBuffer;
-                                
-                            } else {
-                                console.warn('No samples were retrieved from Rubber Band');
-                                return null;
-                            }
-                        } else {
-                            console.warn('No output samples available from Rubber Band');
-                            return null;
-                        }
-                        
-                    } finally {
-                        // Clean up stretcher instance
-                        console.log('Cleaning up Rubber Band stretcher...');
-                        this.rubberBandModule._rubberband_delete(stretcher);
-                        
-                        // Clean up allocated memory
-                        console.log('Cleaning up WASM memory...');
-                        
-                        // Free input channel memory
-                        for (let c = 0; c < inputChannelPtrs.length; c++) {
-                            this.rubberBandModule._free(inputChannelPtrs[c]);
-                        }
-                        this.rubberBandModule._free(inputPtrs);
-                        
-                        // Free output channel memory
-                        for (let c = 0; c < outputChannelPtrs.length; c++) {
-                            this.rubberBandModule._free(outputChannelPtrs[c]);
-                        }
-                        this.rubberBandModule._free(outputPtrs);
-                        
-                        console.log('Memory cleanup completed');
-                    }
-                    
-                } catch (error) {
-                    console.error('Error in processTimeStretching:');
-                    console.error('Error name:', error.name);
-                    console.error('Error message:', error.message);
-                    console.error('Error stack:', error.stack);
-                    console.error('Error toString:', error.toString());
-                    
-                    // Additional debugging info
-                    console.error('AudioContext state:', this.audioContext ? this.audioContext.state : 'null');
-                    console.error('Original buffer info:', {
-                        channels: audioBuffer.numberOfChannels,
-                        length: audioBuffer.length,
-                        sampleRate: audioBuffer.sampleRate,
-                        duration: audioBuffer.duration
-                    });
-                    
-                    return null;
-                }
-            }
-
-            audioBufferToWav(audioBuffer) {
-                const length = audioBuffer.length;
-                const numberOfChannels = audioBuffer.numberOfChannels;
-                const sampleRate = audioBuffer.sampleRate;
-                const format = 1; // PCM
-                const bitDepth = 16;
-                
-                const bytesPerSample = bitDepth / 8;
-                const blockAlign = numberOfChannels * bytesPerSample;
-                const byteRate = sampleRate * blockAlign;
-                const dataSize = length * blockAlign;
-                const headerSize = 44;
-                const fileSize = headerSize + dataSize - 8;
-                
-                const buffer = new ArrayBuffer(headerSize + dataSize);
-                const view = new DataView(buffer);
-                
-                // WAV header
-                const writeString = (offset, string) => {
-                    for (let i = 0; i < string.length; i++) {
-                        view.setUint8(offset + i, string.charCodeAt(i));
-                    }
-                };
-                
-                writeString(0, 'RIFF');
-                view.setUint32(4, fileSize, true);
-                writeString(8, 'WAVE');
-                writeString(12, 'fmt ');
-                view.setUint32(16, 16, true); // fmt chunk size
-                view.setUint16(20, format, true);
-                view.setUint16(22, numberOfChannels, true);
-                view.setUint32(24, sampleRate, true);
-                view.setUint32(28, byteRate, true);
-                view.setUint16(32, blockAlign, true);
-                view.setUint16(34, bitDepth, true);
-                writeString(36, 'data');
-                view.setUint32(40, dataSize, true);
-                
-                // Convert audio data
-                let offset = headerSize;
-                for (let i = 0; i < length; i++) {
-                    for (let channel = 0; channel < numberOfChannels; channel++) {
-                        const sample = Math.max(-1, Math.min(1, audioBuffer.getChannelData(channel)[i]));
-                        view.setInt16(offset, sample * 0x7FFF, true);
-                        offset += 2;
-                    }
-                }
-                
-                return new Uint8Array(buffer);
+            updateTimeStretching() {
+                const rate = this.playbackSpeed / 100;
+                [this.primaryAudio, this.secondaryAudio].forEach(a => {
+                    a.playbackRate = rate;
+                    if ('preservesPitch' in a) a.preservesPitch = true;
+                    if ('mozPreservesPitch' in a) a.mozPreservesPitch = true;
+                    if ('webkitPreservesPitch' in a) a.webkitPreservesPitch = true;
+                });
             }
         }
 
