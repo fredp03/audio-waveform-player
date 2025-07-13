@@ -1,3 +1,5 @@
 {
-  "dependencies": {}
+  "dependencies": {
+    "rubberband-web": "^0.2.1"
+  }
 }

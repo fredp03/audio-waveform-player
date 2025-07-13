@@ -1,6 +1,8 @@
 const { Plugin, Component, TFile } = require('obsidian');
+const { createRubberBandNode } = require('rubberband-web');
+const { pathToFileURL } = require('url');
 
-// Time stretching now relies on the browser's native playbackRate feature
+// Time stretching now uses the rubberband-web library for higher quality
 
 class AudioWaveformPlayerComponent extends Component {
 	constructor(container, config, app) {
@@ -27,7 +29,7 @@ class AudioWaveformPlayerComponent extends Component {
 		this.playbackSpeed = 100; // Current playback speed percentage (40-125%)
 		this.isDraggingSpeedSlider = false; // Track if speed slider is being dragged
 		
-                // Simple time stretching using playbackRate
+                this.rubberBandNodes = []; // RubberBand nodes for time stretching
 	}
 
 	async render() {
@@ -118,9 +120,10 @@ class AudioWaveformPlayerComponent extends Component {
 		this.speedSliderContainer = this.container.querySelector('.playback-speed-slider-container');
 		this.speedIndicator = this.container.querySelector('.playback-speed-indicator');
 
-		// Set up the audio source
-		await this.setupAudio();
-		this.setupEventListeners();
+                // Set up the audio source
+                await this.setupAudio();
+                await this.setupRubberBand();
+                this.setupEventListeners();
 		await this.loadAudioData();
 		this.generateWaveform();
 		
@@ -128,8 +131,8 @@ class AudioWaveformPlayerComponent extends Component {
 		this.updateSpeedSliderPosition();
 	}
 
-	async setupAudio() {
-		let audioPath = this.config.src;
+        async setupAudio() {
+                let audioPath = this.config.src;
 		
 		// If it's just a filename (no path separators), prepend the standard path
 		if (!audioPath.includes('/') && !audioPath.includes('\\')) {
@@ -220,8 +223,37 @@ class AudioWaveformPlayerComponent extends Component {
 		this.updateGuitarIconState();
 		
 		// Initialize speed icon state
-		this.updateSpeedIconState();
-	}
+                this.updateSpeedIconState();
+        }
+
+        async setupRubberBand() {
+                if (!this.audioContext) {
+                        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+
+                const processorUrl = pathToFileURL(require.resolve('rubberband-web/public/rubberband-processor.js')).href;
+
+                const nodePrimary = await createRubberBandNode(this.audioContext, processorUrl);
+                const nodeSecondary = await createRubberBandNode(this.audioContext, processorUrl);
+
+                nodePrimary.setHighQuality(true);
+                nodeSecondary.setHighQuality(true);
+                nodePrimary.setPitch(1);
+                nodeSecondary.setPitch(1);
+
+                const sourcePrimary = this.audioContext.createMediaElementSource(this.primaryAudio);
+                const sourceSecondary = this.audioContext.createMediaElementSource(this.secondaryAudio);
+
+                sourcePrimary.connect(nodePrimary).connect(this.audioContext.destination);
+                sourceSecondary.connect(nodeSecondary).connect(this.audioContext.destination);
+
+                this.primaryAudio.playbackRate = 1;
+                this.secondaryAudio.playbackRate = 1;
+
+                this.rubberBandNodes = [nodePrimary, nodeSecondary];
+
+                this.updateTimeStretching();
+        }
 
 	setupEventListeners() {
 		this.playBtn.addEventListener('click', () => this.play());
@@ -421,14 +453,16 @@ class AudioWaveformPlayerComponent extends Component {
 		});
 	}
 
-	async loadAudioData() {
-		try {
-			this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        async loadAudioData() {
+                try {
+                        if (!this.audioContext) {
+                                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        }
                         await this.loadAudioForWaveform();
-		} catch (error) {
-			console.error('Error loading audio for waveform:', error);
-		}
-	}
+                } catch (error) {
+                        console.error('Error loading audio for waveform:', error);
+                }
+        }
 
         async loadAudioForWaveform() {
 		return new Promise((resolve) => {
@@ -503,9 +537,12 @@ class AudioWaveformPlayerComponent extends Component {
 		}
 	}
 
-	play() {
-		this.currentAudio.play();
-		this.isPlaying = true;
+        play() {
+                if (this.audioContext && this.audioContext.state === 'suspended') {
+                        this.audioContext.resume();
+                }
+                this.currentAudio.play();
+                this.isPlaying = true;
 		this.playBtn.style.display = 'none';
 		this.pauseBtn.style.display = 'block';
 		this.playhead.style.display = 'block';
@@ -788,12 +825,17 @@ class AudioWaveformPlayerComponent extends Component {
 
         updateTimeStretching() {
                 const rate = this.playbackSpeed / 100;
-                [this.primaryAudio, this.secondaryAudio].forEach(audio => {
-                        audio.playbackRate = rate;
-                        if ('preservesPitch' in audio) audio.preservesPitch = true;
-                        if ('mozPreservesPitch' in audio) audio.mozPreservesPitch = true;
-                        if ('webkitPreservesPitch' in audio) audio.webkitPreservesPitch = true;
-                });
+                if (this.rubberBandNodes.length === 2) {
+                        this.rubberBandNodes[0].setTempo(rate);
+                        this.rubberBandNodes[1].setTempo(rate);
+                } else {
+                        [this.primaryAudio, this.secondaryAudio].forEach(audio => {
+                                audio.playbackRate = rate;
+                                if ('preservesPitch' in audio) audio.preservesPitch = true;
+                                if ('mozPreservesPitch' in audio) audio.mozPreservesPitch = true;
+                                if ('webkitPreservesPitch' in audio) audio.webkitPreservesPitch = true;
+                        });
+                }
         }
 }
 
