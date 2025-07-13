@@ -1,8 +1,41 @@
 const { Plugin, Component, TFile } = require('obsidian');
-const { createRubberBandNode } = require('rubberband-web');
-const { pathToFileURL } = require('url');
 
 // Time stretching now uses the rubberband-web library for higher quality
+
+// Inline RubberBand functionality to avoid module resolution issues
+function createWorkletAsRubberNode(context, options) {
+    const node = new AudioWorkletNode(context, "rubberband-processor", options);
+    node.setPitch = function (pitch) {
+        node.port.postMessage(JSON.stringify(["pitch", pitch]));
+    };
+    node.setTempo = function (pitch) {
+        node.port.postMessage(JSON.stringify(["tempo", pitch]));
+    };
+    node.setHighQuality = function (pitch) {
+        node.port.postMessage(JSON.stringify(["quality", pitch]));
+    };
+    node.close = function () {
+        node.port.postMessage(JSON.stringify(["close"]));
+    };
+    return node;
+}
+
+async function createRubberBandNode(context, url, options) {
+    try {
+        // Try to create the node first (in case the worklet is already loaded)
+        return createWorkletAsRubberNode(context, options);
+    } catch (err) {
+        console.log('AudioWorklet not yet loaded, attempting to load from:', url);
+        try {
+            await context.audioWorklet.addModule(url);
+            console.log('AudioWorklet loaded successfully');
+            return createWorkletAsRubberNode(context, options);
+        } catch (workletError) {
+            console.error('Failed to load AudioWorklet:', workletError);
+            throw new Error(`Could not load rubberband processor: ${workletError.message}`);
+        }
+    }
+}
 
 class AudioWaveformPlayerComponent extends Component {
 	constructor(container, config, app) {
@@ -33,108 +66,145 @@ class AudioWaveformPlayerComponent extends Component {
 	}
 
 	async render() {
-        // Create the HTML structure
-        this.container.innerHTML = `
-            <div class="audio-player-wrapper" style="padding: 10px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 25px; display: flex; width: ${this.config.width || 500}px; margin: 0 auto;">
-                <div class="audio-player-frame" style="padding: 21px 24px 12px 24px; background: var(--background-primary); border: 1px solid var(--background-modifier-border); box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25); border-radius: 11px; flex-direction: column; justify-content: flex-start; align-items: center; gap: 27px; display: flex; width: 100%;">
-                    <div class="waveform-container" style="position: relative; cursor: pointer; width: 100%;">
-                        <svg width="447" height="34" viewBox="0 0 447 34" fill="none" xmlns="http://www.w3.org/2000/svg" class="waveform-svg" style="width: 100%; height: 34px;">
-                            <!-- Waveform will be generated here -->
-                        </svg>
-                        <div class="playhead" style="position: absolute; top: 0; left: 0; width: 2px; height: 34px; background: var(--text-accent); transition: left 0.1s ease-out; display: none;"></div>
-                    </div>
-                    <div class="controls" style="align-self: stretch; justify-content: space-between; align-items: center; display: inline-flex;">
-                        <div class="volume-icon" style="cursor: pointer; transition: opacity 0.2s ease;">
-							<svg width="11" height="10" viewBox="0 0 11 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-								<path d="M8.25004 9.44682C8.25004 9.89572 7.74447 10.1571 7.38045 9.89637L4.53963 7.85937L8.25004 4.96316V9.44682ZM7.38045 0.103793C7.74447 -0.157125 8.25001 0.103885 8.25004 0.552806V3.56437L2.87565 7.75965H2.74996C2.14244 7.75965 1.64995 7.2654 1.64995 6.65572V3.34391C1.65002 2.73428 2.14248 2.23997 2.74996 2.23997H4.39998L7.38045 0.103793Z" fill="var(--text-muted)"/>
-								<path d="M10.1122 0.700637C10.3519 0.513529 10.6975 0.556659 10.8841 0.797123C11.0705 1.03769 11.0275 1.38452 10.7879 1.57171L0.887776 9.29926C0.648064 9.48637 0.302464 9.44324 0.115939 9.20278C-0.0705037 8.96221 -0.0275275 8.61538 0.212083 8.42819L10.1122 0.700637Z" fill="var(--text-muted)"/>
-							</svg>
-						</div>
-                        <div class="guitar-icon" style="cursor: pointer; transition: opacity 0.2s ease;">
-							<svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" clip-rule="evenodd" d="M14.7847 0.49309C14.5675 0.779052 14.1588 1.21574 13.8764 1.4636C13.4064 1.87609 13.3586 1.95132 13.3115 2.35413C13.2642 2.75932 13.012 3.15042 10.12 7.30558C8.39296 9.78694 6.93503 11.8649 6.88014 11.9232C6.7396 12.0729 6.10327 11.7734 5.90262 11.4632C5.76035 11.2433 5.75905 11.1909 5.88378 10.7192C5.97029 10.3923 5.98983 10.1608 5.93884 10.0686C5.80994 9.83516 5.38798 9.89455 5.0521 10.1933C4.73072 10.4791 4.30546 11.2495 4.30407 11.5484C4.30268 11.8526 3.9079 12.6092 3.64325 12.815C3.50557 12.922 3.03349 13.2473 2.59416 13.5376C2.15491 13.828 1.65183 14.2328 1.47637 14.4371C0.823191 15.1975 0.588585 16.0722 0.862451 16.7253C1.26252 17.679 2.62717 18.9626 3.95151 19.6306C4.63127 19.9735 4.73454 20 5.39094 20C6.00607 20 6.16407 19.9657 6.60514 19.736C6.96404 19.5491 7.19526 19.3496 7.39669 19.0528C7.68098 18.6338 7.73509 18.4395 8.08817 16.5685C8.31157 15.3847 8.38141 15.2558 8.96736 14.9474C9.7484 14.5363 10.1101 14.1409 10.2814 13.5109C10.4966 12.7192 10.0529 12.2188 9.12562 12.2071C8.16192 12.1952 8.11388 12.3485 9.93792 9.61527C14.0543 3.44686 13.9824 3.54848 14.257 3.51874C14.3967 3.50361 14.556 3.43199 14.6111 3.35948C14.6766 3.27334 14.7311 3.25997 14.7682 3.32095C14.8637 3.47739 14.9886 3.42512 14.9886 3.22882C14.9886 3.10018 14.9487 3.05892 14.8583 3.09411C14.7705 3.12816 14.728 3.08989 14.728 2.97673C14.728 2.77991 14.8652 2.66719 14.9452 2.79829C15.0183 2.91822 15.1623 2.82337 15.1623 2.65523C15.1623 2.56442 15.1097 2.53943 14.9958 2.57604C14.8615 2.61915 14.8382 2.59531 14.8749 2.45268C14.9043 2.339 14.9836 2.28268 15.097 2.29509C15.194 2.30565 15.2908 2.26491 15.312 2.20437C15.3348 2.13909 15.277 2.09439 15.1695 2.09439C14.9707 2.09439 14.9479 2.03042 15.0755 1.83042C15.1316 1.74244 15.1601 1.73513 15.161 1.80843C15.1617 1.86896 15.221 1.91841 15.2926 1.91841C15.3672 1.91841 15.4229 1.83913 15.4229 1.73302C15.4229 1.60438 15.383 1.56312 15.2926 1.59831C15.204 1.63271 15.1623 1.59356 15.1623 1.47574C15.1623 1.28736 15.29 1.24389 15.3852 1.3999C15.4266 1.46774 15.4672 1.46114 15.5193 1.3779C15.6371 1.18961 15.6106 1.12652 15.4136 1.12652C15.2825 1.12652 15.2455 1.0871 15.2833 0.98732C15.3123 0.910771 15.336 0.826742 15.336 0.80061C15.336 0.774389 15.3963 0.803689 15.47 0.865633C15.5652 0.945702 15.6309 0.950981 15.6969 0.88411C15.8192 0.760223 15.713 0.592605 15.552 0.655253C15.4537 0.69344 15.4305 0.630616 15.4462 0.368851C15.4781 -0.16207 15.2499 -0.119132 14.7847 0.49309ZM7.00626 12.944C7.65952 13.4186 7.75924 13.5753 7.50952 13.7348C7.40094 13.8041 7.22306 13.7198 6.70607 13.3542C6.03456 12.8793 5.95787 12.7735 6.14635 12.5826C6.29679 12.4302 6.30183 12.4322 7.00626 12.944ZM4.03524 13.6537C4.1518 13.7959 4.07389 14.0608 3.91537 14.0608C3.85475 14.0608 3.75642 14.0014 3.69692 13.9288C3.61067 13.8235 3.61067 13.7702 3.69692 13.6648C3.83095 13.5013 3.90825 13.4987 4.03524 13.6537ZM5.74254 14.8747C6.09615 15.1287 6.38634 15.371 6.38747 15.4131C6.3893 15.4799 5.52235 16.7948 5.34464 16.9948C5.28679 17.0599 3.93787 16.1779 3.83347 16.0067C3.77041 15.9034 4.83877 14.4127 4.97584 14.4127C5.04393 14.4127 5.38894 14.6207 5.74254 14.8747ZM3.30606 14.8087C3.30606 15.012 3.01334 15.1016 2.90885 14.9303C2.81843 14.782 2.98659 14.5728 3.16778 14.6082C3.24387 14.6229 3.30606 14.7132 3.30606 14.8087ZM2.50426 15.4906C2.56593 15.6695 2.47377 15.8206 2.30301 15.8206C2.11148 15.8206 2.01333 15.6834 2.07961 15.5084C2.13885 15.352 2.45206 15.3389 2.50426 15.4906Z" fill="var(--text-muted)"/>
-							</svg>
-						</div>
-						<div class="play-pause" style="padding-left: 32px; padding-right: 32px; justify-content: flex-start; align-items: center; gap: 71px; display: flex;">
-							<div class="play-btn" style="cursor: pointer;">
-								<svg width="20" height="24" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-									<path d="M18.9091 13.1064C19.697 12.5954 19.697 11.4046 18.9091 10.8936L2.42348 0.200406C1.58614 -0.342724 0.5 0.282035 0.5 1.30681V22.6932C0.5 23.718 1.58614 24.3427 2.42348 23.7996L18.9091 13.1064Z" fill="var(--text-muted)"/>
+		try {
+			// Create the HTML structure
+			this.container.innerHTML = `
+			    <div class="audio-player-wrapper" style="padding: 10px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 25px; display: flex; width: ${this.config.width || 500}px; margin: 0 auto;">
+			        <div class="audio-player-frame" style="padding: 21px 24px 12px 24px; background: var(--background-primary); border: 1px solid var(--background-modifier-border); box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25); border-radius: 11px; flex-direction: column; justify-content: flex-start; align-items: center; gap: 27px; display: flex; width: 100%;">
+			            <div class="waveform-container" style="position: relative; cursor: pointer; width: 100%;">
+			                <svg width="447" height="34" viewBox="0 0 447 34" fill="none" xmlns="http://www.w3.org/2000/svg" class="waveform-svg" style="width: 100%; height: 34px;">
+			                    <!-- Waveform will be generated here -->
+			                </svg>
+			                <div class="playhead" style="position: absolute; top: 0; left: 0; width: 2px; height: 34px; background: var(--text-accent); transition: left 0.1s ease-out; display: none;"></div>
+			            </div>
+			            <div class="controls" style="align-self: stretch; justify-content: space-between; align-items: center; display: inline-flex;">
+			                <div class="volume-icon" style="cursor: pointer; transition: opacity 0.2s ease;">
+								<svg width="11" height="10" viewBox="0 0 11 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path d="M8.25004 9.44682C8.25004 9.89572 7.74447 10.1571 7.38045 9.89637L4.53963 7.85937L8.25004 4.96316V9.44682ZM7.38045 0.103793C7.74447 -0.157125 8.25001 0.103885 8.25004 0.552806V3.56437L2.87565 7.75965H2.74996C2.14244 7.75965 1.64995 7.2654 1.64995 6.65572V3.34391C1.65002 2.73428 2.14248 2.23997 2.74996 2.23997H4.39998L7.38045 0.103793Z" fill="var(--text-muted)"/>
+									<path d="M10.1122 0.700637C10.3519 0.513529 10.6975 0.556659 10.8841 0.797123C11.0705 1.03769 11.0275 1.38452 10.7879 1.57171L0.887776 9.29926C0.648064 9.48637 0.302464 9.44324 0.115939 9.20278C-0.0705037 8.96221 -0.0275275 8.61538 0.212083 8.42819L10.1122 0.700637Z" fill="var(--text-muted)"/>
 								</svg>
 							</div>
-							<div class="pause-btn" style="cursor: pointer; display: none;">
-								<svg width="20" height="24" viewBox="0 0 11 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-									<path d="M0 1.33333C0 0.596954 0.615609 0 1.375 0H2.75C3.50939 0 4.125 0.596954 4.125 1.33333V10.6667C4.125 11.403 3.50939 12 2.75 12H1.375C0.615608 12 0 11.403 0 10.6667V1.33333Z" fill="var(--text-muted)"/>
-									<path d="M6.875 1.33333C6.875 0.596954 7.49061 0 8.25 0H9.625C10.3844 0 11 0.596954 11 1.33333V10.6667C11 11.403 10.3844 12 9.625 12H8.25C7.49061 12 6.875 11.403 6.875 10.6667V1.33333Z" fill="var(--text-muted)"/>
+			                <div class="guitar-icon" style="cursor: pointer; transition: opacity 0.2s ease;">
+								<svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path fill-rule="evenodd" clip-rule="evenodd" d="M14.7847 0.49309C14.5675 0.779052 14.1588 1.21574 13.8764 1.4636C13.4064 1.87609 13.3586 1.95132 13.3115 2.35413C13.2642 2.75932 13.012 3.15042 10.12 7.30558C8.39296 9.78694 6.93503 11.8649 6.88014 11.9232C6.7396 12.0729 6.10327 11.7734 5.90262 11.4632C5.76035 11.2433 5.75905 11.1909 5.88378 10.7192C5.97029 10.3923 5.98983 10.1608 5.93884 10.0686C5.80994 9.83516 5.38798 9.89455 5.0521 10.1933C4.73072 10.4791 4.30546 11.2495 4.30407 11.5484C4.30268 11.8526 3.9079 12.6092 3.64325 12.815C3.50557 12.922 3.03349 13.2473 2.59416 13.5376C2.15491 13.828 1.65183 14.2328 1.47637 14.4371C0.823191 15.1975 0.588585 16.0722 0.862451 16.7253C1.26252 17.679 2.62717 18.9626 3.95151 19.6306C4.63127 19.9735 4.73454 20 5.39094 20C6.00607 20 6.16407 19.9657 6.60514 19.736C6.96404 19.5491 7.19526 19.3496 7.39669 19.0528C7.68098 18.6338 7.73509 18.4395 8.08817 16.5685C8.31157 15.3847 8.38141 15.2558 8.96736 14.9474C9.7484 14.5363 10.1101 14.1409 10.2814 13.5109C10.4966 12.7192 10.0529 12.2188 9.12562 12.2071C8.16192 12.1952 8.11388 12.3485 9.93792 9.61527C14.0543 3.44686 13.9824 3.54848 14.257 3.51874C14.3967 3.50361 14.556 3.43199 14.6111 3.35948C14.6766 3.27334 14.7311 3.25997 14.7682 3.32095C14.8637 3.47739 14.9886 3.42512 14.9886 3.22882C14.9886 3.10018 14.9487 3.05892 14.8583 3.09411C14.7705 3.12816 14.728 3.08989 14.728 2.97673C14.728 2.77991 14.8652 2.66719 14.9452 2.79829C15.0183 2.91822 15.1623 2.82337 15.1623 2.65523C15.1623 2.56442 15.1097 2.53943 14.9958 2.57604C14.8615 2.61915 14.8382 2.59531 14.8749 2.45268C14.9043 2.339 14.9836 2.28268 15.097 2.29509C15.194 2.30565 15.2908 2.26491 15.312 2.20437C15.3348 2.13909 15.277 2.09439 15.1695 2.09439C14.9707 2.09439 14.9479 2.03042 15.0755 1.83042C15.1316 1.74244 15.1601 1.73513 15.161 1.80843C15.1617 1.86896 15.221 1.91841 15.2926 1.91841C15.3672 1.91841 15.4229 1.83913 15.4229 1.73302C15.4229 1.60438 15.383 1.56312 15.2926 1.59831C15.204 1.63271 15.1623 1.59356 15.1623 1.47574C15.1623 1.28736 15.29 1.24389 15.3852 1.3999C15.4266 1.46774 15.4672 1.46114 15.5193 1.3779C15.6371 1.18961 15.6106 1.12652 15.4136 1.12652C15.2825 1.12652 15.2455 1.0871 15.2833 0.98732C15.3123 0.910771 15.336 0.826742 15.336 0.80061C15.336 0.774389 15.3963 0.803689 15.47 0.865633C15.5652 0.945702 15.6309 0.950981 15.6969 0.88411C15.8192 0.760223 15.713 0.592605 15.552 0.655253C15.4537 0.69344 15.4305 0.630616 15.4462 0.368851C15.4781 -0.16207 15.2499 -0.119132 14.7847 0.49309ZM7.00626 12.944C7.65952 13.4186 7.75924 13.5753 7.50952 13.7348C7.40094 13.8041 7.22306 13.7198 6.70607 13.3542C6.03456 12.8793 5.95787 12.7735 6.14635 12.5826C6.29679 12.4302 6.30183 12.4322 7.00626 12.944ZM4.03524 13.6537C4.1518 13.7959 4.07389 14.0608 3.91537 14.0608C3.85475 14.0608 3.75642 14.0014 3.69692 13.9288C3.61067 13.8235 3.61067 13.7702 3.69692 13.6648C3.83095 13.5013 3.90825 13.4987 4.03524 13.6537ZM5.74254 14.8747C6.09615 15.1287 6.38634 15.371 6.38747 15.4131C6.3893 15.4799 5.52235 16.7948 5.34464 16.9948C5.28679 17.0599 3.93787 16.1779 3.83347 16.0067C3.77041 15.9034 4.83877 14.4127 4.97584 14.4127C5.04393 14.4127 5.38894 14.6207 5.74254 14.8747ZM3.30606 14.8087C3.30606 15.012 3.01334 15.1016 2.90885 14.9303C2.81843 14.782 2.98659 14.5728 3.16778 14.6082C3.24387 14.6229 3.30606 14.7132 3.30606 14.8087ZM2.50426 15.4906C2.56593 15.6695 2.47377 15.8206 2.30301 15.8206C2.11148 15.8206 2.01333 15.6834 2.07961 15.5084C2.13885 15.352 2.45206 15.3389 2.50426 15.4906Z" fill="var(--text-muted)"/>
+								</svg>
+							</div>
+							<div class="play-pause" style="padding-left: 32px; padding-right: 32px; justify-content: flex-start; align-items: center; gap: 71px; display: flex;">
+								<div class="play-btn" style="cursor: pointer;">
+									<svg width="20" height="24" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<path d="M18.9091 13.1064C19.697 12.5954 19.697 11.4046 18.9091 10.8936L2.42348 0.200406C1.58614 -0.342724 0.5 0.282035 0.5 1.30681V22.6932C0.5 23.718 1.58614 24.3427 2.42348 23.7996L18.9091 13.1064Z" fill="var(--text-muted)"/>
+									</svg>
+								</div>
+								<div class="pause-btn" style="cursor: pointer; display: none;">
+									<svg width="20" height="24" viewBox="0 0 11 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<path d="M0 1.33333C0 0.596954 0.615609 0 1.375 0H2.75C3.50939 0 4.125 0.596954 4.125 1.33333V10.6667C4.125 11.403 3.50939 12 2.75 12H1.375C0.615608 12 0 11.403 0 10.6667V1.33333Z" fill="var(--text-muted)"/>
+										<path d="M6.875 1.33333C6.875 0.596954 7.49061 0 8.25 0H9.625C10.3844 0 11 0.596954 11 1.33333V10.6667C11 11.403 10.3844 12 9.625 12H8.25C7.49061 12 6.875 11.403 6.875 10.6667V1.33333Z" fill="var(--text-muted)"/>
+									</svg>
+								</div>
+							</div>
+							<div class="loop-btn" style="cursor: pointer; opacity: 0.6;">
+								<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path d="M2.34374 6.60969C2.34374 4.75107 3.8129 3.24437 5.62519 3.24437H8.35973M10.5474 7.17057C10.5474 9.02919 9.07821 10.5359 7.26592 10.5359H4.53138M8.35973 5.14669V1.56178C8.35973 1.12124 8.83223 0.852667 9.1965 1.08615L11.993 2.87861C12.3357 3.09829 12.3357 3.61019 11.993 3.82987L9.1965 5.62232C8.83223 5.85581 8.35973 5.58723 8.35973 5.14669ZM5.14027 12.4382V8.85331C5.14027 8.41277 4.66777 8.14419 4.3035 8.37768L1.50705 10.1701C1.16432 10.3898 1.16432 10.9017 1.50705 11.1214L4.3035 12.9138C4.66777 13.1473 5.14027 12.8788 5.14027 12.4382Z" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+								</svg>
+							</div>
+							<div class="speed-icon" style="cursor: pointer; opacity: 0.6;">
+								<svg width="14" height="10" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path d="M5.23529 8.6C5.23529 8.33736 5.28094 8.07728 5.36962 7.83463C5.45831 7.59198 5.5883 7.3715 5.75216 7.18579C5.91603 7.00007 6.11057 6.85275 6.32468 6.75224C6.53878 6.65173 6.76826 6.6 7 6.6C7.23175 6.6 7.46122 6.65173 7.67532 6.75224C7.88943 6.85275 8.08397 7.00007 8.24784 7.18579C8.4117 7.3715 8.54169 7.59198 8.63038 7.83463C8.71906 8.07729 8.76471 8.33736 8.76471 8.6M8.05882 6.6L9.47059 4.2M1 7.8C1 6.90701 1.15519 6.02277 1.45672 5.19775C1.75825 4.37274 2.20021 3.62311 2.75736 2.99167C3.31451 2.36023 3.97595 1.85935 4.7039 1.51762C5.43186 1.17589 6.21207 1 7 1C7.78793 1 8.56815 1.17589 9.2961 1.51762C10.0241 1.85935 10.6855 2.36024 11.2426 2.99168C11.7998 3.62312 12.2418 4.37274 12.5433 5.19776C12.8448 6.02277 13 6.90702 13 7.8V8.2C13 8.64183 12.684 9 12.2941 9H1.70588C1.31603 9 1 8.64183 1 8.2L1 7.8Z" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 								</svg>
 							</div>
 						</div>
-						<div class="loop-btn" style="cursor: pointer; opacity: 0.6;">
-							<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-								<path d="M2.34374 6.60969C2.34374 4.75107 3.8129 3.24437 5.62519 3.24437H8.35973M10.5474 7.17057C10.5474 9.02919 9.07821 10.5359 7.26592 10.5359H4.53138M8.35973 5.14669V1.56178C8.35973 1.12124 8.83223 0.852667 9.1965 1.08615L11.993 2.87861C12.3357 3.09829 12.3357 3.61019 11.993 3.82987L9.1965 5.62232C8.83223 5.85581 8.35973 5.58723 8.35973 5.14669ZM5.14027 12.4382V8.85331C5.14027 8.41277 4.66777 8.14419 4.3035 8.37768L1.50705 10.1701C1.16432 10.3898 1.16432 10.9017 1.50705 11.1214L4.3035 12.9138C4.66777 13.1473 5.14027 12.8788 5.14027 12.4382Z" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-							</svg>
-						</div>
-						<div class="speed-icon" style="cursor: pointer; opacity: 0.6;">
-							<svg width="14" height="10" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-								<path d="M5.23529 8.6C5.23529 8.33736 5.28094 8.07728 5.36962 7.83463C5.45831 7.59198 5.5883 7.3715 5.75216 7.18579C5.91603 7.00007 6.11057 6.85275 6.32468 6.75224C6.53878 6.65173 6.76826 6.6 7 6.6C7.23175 6.6 7.46122 6.65173 7.67532 6.75224C7.88943 6.85275 8.08397 7.00007 8.24784 7.18579C8.4117 7.3715 8.54169 7.59198 8.63038 7.83463C8.71906 8.07729 8.76471 8.33736 8.76471 8.6M8.05882 6.6L9.47059 4.2M1 7.8C1 6.90701 1.15519 6.02277 1.45672 5.19775C1.75825 4.37274 2.20021 3.62311 2.75736 2.99167C3.31451 2.36023 3.97595 1.85935 4.7039 1.51762C5.43186 1.17589 6.21207 1 7 1C7.78793 1 8.56815 1.17589 9.2961 1.51762C10.0241 1.85935 10.6855 2.36024 11.2426 2.99168C11.7998 3.62312 12.2418 4.37274 12.5433 5.19776C12.8448 6.02277 13 6.90702 13 7.8V8.2C13 8.64183 12.684 9 12.2941 9H1.70588C1.31603 9 1 8.64183 1 8.2L1 7.8Z" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-							</svg>
-						</div>
 					</div>
-				</div>
-				<div class="playback-speed-wrapper" style="align-self: stretch; height: 47px; flex-direction: column; justify-content: space-between; align-items: center; display: none;">
-					<div class="playback-speed-menu" style="padding: 15px; background: var(--background-primary); box-shadow: 0px 4px 3.4px rgba(0, 0, 0, 0.25); border-radius: 4px; justify-content: flex-start; align-items: center; gap: 10px; display: inline-flex; position: relative;">
+					<div class="playback-speed-wrapper" style="align-self: stretch; height: 47px; flex-direction: column; justify-content: space-between; align-items: center; display: none;">
+						<div class="playback-speed-menu" style="padding: 15px; background: var(--background-primary); box-shadow: 0px 4px 3.4px rgba(0, 0, 0, 0.25); border-radius: 4px; justify-content: flex-start; align-items: center; gap: 10px; display: inline-flex; position: relative;">
 
-						<div class="playback-speed-slider-container" style="position: relative; width: 211px; height: 13px; display: flex; align-items: center;">
-							<!-- Rail line -->
-							<div class="slider-rail" style="position: absolute; left: 1.5px; right: 1.5px; height: 3px; background: var(--text-muted); border-radius: 1.5px;"></div>
-							
-							<!-- Grabber circle -->
-							<div class="playback-speed-slider-grabber" style="position: absolute; left: 126px; width: 14px; height: 14px; transform: translateX(-50%); cursor: grab;">
-								<div style="width: 13px; height: 13px; background: #6586B3; border-radius: 50%; border: 0.5px solid #5a75a0;"></div>
+							<div class="playback-speed-slider-container" style="position: relative; width: 211px; height: 13px; display: flex; align-items: center;">
+								<!-- Rail line -->
+								<div class="slider-rail" style="position: absolute; left: 1.5px; right: 1.5px; height: 3px; background: var(--text-muted); border-radius: 1.5px;"></div>
+								
+								<!-- Grabber circle -->
+								<div class="playback-speed-slider-grabber" style="position: absolute; left: 126px; width: 14px; height: 14px; transform: translateX(-50%); cursor: grab;">
+									<div style="width: 13px; height: 13px; background: #6586B3; border-radius: 50%; border: 0.5px solid #5a75a0;"></div>
+								</div>
 							</div>
+
+							<div class="playback-speed-indicator" style="color: var(--text-muted); font-size: 10px; font-family: var(--font-interface); font-weight: 400;">100%</div>
 						</div>
-
-						<div class="playback-speed-indicator" style="color: var(--text-muted); font-size: 10px; font-family: var(--font-interface); font-weight: 400;">100%</div>
 					</div>
+
 				</div>
+				<audio preload="auto" style="display: none;" class="primary-audio"></audio>
+				<audio preload="auto" style="display: none;" class="secondary-audio"></audio>
+			`;
 
-			</div>
-			<audio preload="auto" style="display: none;" class="primary-audio"></audio>
-			<audio preload="auto" style="display: none;" class="secondary-audio"></audio>
-		`;
+			// Get references to elements
+			this.primaryAudio = this.container.querySelector('.primary-audio');
+			this.secondaryAudio = this.container.querySelector('.secondary-audio');
+			this.currentAudio = this.primaryAudio; // Start with primary
+			this.audio = this.currentAudio; // For backward compatibility
+			this.waveformSvg = this.container.querySelector('.waveform-svg');
+			this.waveformContainer = this.container.querySelector('.waveform-container');
+			this.playhead = this.container.querySelector('.playhead');
+			this.playBtn = this.container.querySelector('.play-btn');
+			this.pauseBtn = this.container.querySelector('.pause-btn');
+			this.loopBtn = this.container.querySelector('.loop-btn');
+			this.guitarIcon = this.container.querySelector('.guitar-icon');
+			this.speedIcon = this.container.querySelector('.speed-icon');
+			this.speedSliderWrapper = this.container.querySelector('.playback-speed-wrapper');
+			this.speedSliderGrabber = this.container.querySelector('.playback-speed-slider-grabber');
+			this.speedSliderContainer = this.container.querySelector('.playback-speed-slider-container');
+			this.speedIndicator = this.container.querySelector('.playback-speed-indicator');
 
-		// Get references to elements
-		this.primaryAudio = this.container.querySelector('.primary-audio');
-		this.secondaryAudio = this.container.querySelector('.secondary-audio');
-		this.currentAudio = this.primaryAudio; // Start with primary
-		this.audio = this.currentAudio; // For backward compatibility
-		this.waveformSvg = this.container.querySelector('.waveform-svg');
-		this.waveformContainer = this.container.querySelector('.waveform-container');
-		this.playhead = this.container.querySelector('.playhead');
-		this.playBtn = this.container.querySelector('.play-btn');
-		this.pauseBtn = this.container.querySelector('.pause-btn');
-		this.loopBtn = this.container.querySelector('.loop-btn');
-		this.guitarIcon = this.container.querySelector('.guitar-icon');
-		this.speedIcon = this.container.querySelector('.speed-icon');
-		this.speedSliderWrapper = this.container.querySelector('.playback-speed-wrapper');
-		this.speedSliderGrabber = this.container.querySelector('.playback-speed-slider-grabber');
-		this.speedSliderContainer = this.container.querySelector('.playback-speed-slider-container');
-		this.speedIndicator = this.container.querySelector('.playback-speed-indicator');
+			// Set up the audio source (with error handling)
+			try {
+				await this.setupAudio();
+			} catch (error) {
+				console.error('Audio setup failed:', error);
+				// Continue anyway - some functionality might still work
+			}
 
-                // Set up the audio source
-                await this.setupAudio();
-                await this.setupRubberBand();
-                this.setupEventListeners();
-		await this.loadAudioData();
-		this.generateWaveform();
-		
-		// Initialize speed slider position for 100%
-		this.updateSpeedSliderPosition();
+			// Set up RubberBand (with error handling)
+			try {
+				await this.setupRubberBand();
+			} catch (error) {
+				console.error('RubberBand setup failed:', error);
+				// Continue anyway - basic functionality should still work
+			}
+
+			// Set up event listeners (should always work)
+			this.setupEventListeners();
+
+			// Load audio data and generate waveform (with error handling)
+			try {
+				await this.loadAudioData();
+				this.generateWaveform();
+			} catch (error) {
+				console.error('Waveform generation failed:', error);
+				// Continue anyway
+			}
+			
+			// Initialize speed slider position for 100%
+			this.updateSpeedSliderPosition();
+
+		} catch (error) {
+			console.error('Fatal error in render:', error);
+			
+			// Show error message to user
+			this.container.innerHTML = `
+				<div style="color: red; padding: 20px; border: 1px solid red; border-radius: 5px; margin: 10px;">
+					<h3>Audio Player Error</h3>
+					<p>Failed to initialize audio player: ${error.message}</p>
+					<p>Check the console for more details.</p>
+				</div>
+			`;
+			
+			throw error;
+		}
 	}
 
         async setupAudio() {
                 let audioPath = this.config.src;
 		
-		// If it's just a filename (no path separators), prepend the standard path
+		// If it's just a filename (no path separators), prepend the correct path
 		if (!audioPath.includes('/') && !audioPath.includes('\\')) {
 			audioPath = `Assets/Audio Files/${audioPath}`;
 		}
@@ -151,7 +221,12 @@ class AudioWaveformPlayerComponent extends Component {
 			await this.loadAudioToElement(this.secondaryAudio, alternateAudioPath);
 			
 		} catch (error) {
-			console.warn('Could not load audio files:', error);
+			console.error('Could not load audio files:', error);
+			// Show error in UI
+			const errorDiv = document.createElement('div');
+			errorDiv.style.cssText = 'color: red; padding: 10px; text-align: center;';
+			errorDiv.textContent = `Failed to load audio: ${audioPath}`;
+			this.container.appendChild(errorDiv);
 		}
 	}
 
@@ -159,6 +234,7 @@ class AudioWaveformPlayerComponent extends Component {
 		try {
 			// Try to find the file in the vault
 			const file = this.app.vault.getAbstractFileByPath(audioPath);
+			
 			if (file && file instanceof TFile) {
 				// Get the file URL for local files
 				const arrayBuffer = await this.app.vault.readBinary(file);
@@ -174,10 +250,18 @@ class AudioWaveformPlayerComponent extends Component {
 			audioElement.preload = 'auto';
 			
 			// Wait for the audio to be ready
-			return new Promise((resolve) => {
+			return new Promise((resolve, reject) => {
 				const onCanPlayThrough = () => {
 					audioElement.removeEventListener('canplaythrough', onCanPlayThrough);
+					audioElement.removeEventListener('error', onError);
 					resolve();
+				};
+				
+				const onError = (e) => {
+					audioElement.removeEventListener('canplaythrough', onCanPlayThrough);
+					audioElement.removeEventListener('error', onError);
+					console.error('Audio loading error:', e);
+					reject(new Error(`Failed to load audio: ${audioPath}`));
 				};
 				
 				if (audioElement.readyState >= 4) {
@@ -185,13 +269,14 @@ class AudioWaveformPlayerComponent extends Component {
 					resolve();
 				} else {
 					audioElement.addEventListener('canplaythrough', onCanPlayThrough);
+					audioElement.addEventListener('error', onError);
 					audioElement.load(); // Force load
 				}
 			});
 			
 		} catch (error) {
-			console.warn('Could not load audio file from vault, trying direct path:', error);
-			audioElement.src = audioPath;
+			console.error('Could not load audio file from vault:', error);
+			throw error;
 		}
 	}
 
@@ -227,35 +312,80 @@ class AudioWaveformPlayerComponent extends Component {
         }
 
         async setupRubberBand() {
-                if (!this.audioContext) {
-                        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                try {
+                        if (!this.audioContext) {
+                                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        }
+
+                        // Try multiple approaches to get the processor URL
+                        const possibleUrls = [];
+                        
+                        try {
+                                // Method 1: Use Obsidian's vault adapter
+                                if (this.app.vault.adapter.basePath) {
+                                        const vaultPath = this.app.vault.adapter.basePath;
+                                        possibleUrls.push(`file://${vaultPath}/.obsidian/plugins/obsidian-audio-waveform-player/rubberband-processor.js`);
+                                }
+                        } catch (e) {
+                                // Ignore if basePath is not available
+                        }
+                        
+                        // Method 2: Relative path
+                        possibleUrls.push('./rubberband-processor.js');
+                        
+                        // Method 3: Absolute relative to current location
+                        possibleUrls.push('rubberband-processor.js');
+
+                        let lastError;
+                        for (const url of possibleUrls) {
+                                try {
+                                        console.log('Attempting to load RubberBand processor from:', url);
+                                        
+                                        const nodePrimary = await createRubberBandNode(this.audioContext, url);
+                                        const nodeSecondary = await createRubberBandNode(this.audioContext, url);
+
+                                        nodePrimary.setHighQuality(true);
+                                        nodeSecondary.setHighQuality(true);
+                                        nodePrimary.setPitch(1);
+                                        nodeSecondary.setPitch(1);
+
+                                        const sourcePrimary = this.audioContext.createMediaElementSource(this.primaryAudio);
+                                        const sourceSecondary = this.audioContext.createMediaElementSource(this.secondaryAudio);
+
+                                        sourcePrimary.connect(nodePrimary).connect(this.audioContext.destination);
+                                        sourceSecondary.connect(nodeSecondary).connect(this.audioContext.destination);
+
+                                        this.primaryAudio.playbackRate = 1;
+                                        this.secondaryAudio.playbackRate = 1;
+
+                                        this.rubberBandNodes = [nodePrimary, nodeSecondary];
+
+                                        this.updateTimeStretching();
+                                        
+                                        console.log('RubberBand setup successful with URL:', url);
+                                        return; // Success!
+                                } catch (error) {
+                                        console.warn(`Failed to load processor from ${url}:`, error.message);
+                                        lastError = error;
+                                        continue; // Try next URL
+                                }
+                        }
+                        
+                        // If we get here, all attempts failed
+                        throw new Error(`Could not load RubberBand processor from any URL. Last error: ${lastError?.message}`);
+                        
+                } catch (error) {
+                        console.error('Failed to setup RubberBand:', error);
+                        throw error;
                 }
-
-                const processorUrl = pathToFileURL(require.resolve('rubberband-web/public/rubberband-processor.js')).href;
-
-                const nodePrimary = await createRubberBandNode(this.audioContext, processorUrl);
-                const nodeSecondary = await createRubberBandNode(this.audioContext, processorUrl);
-
-                nodePrimary.setHighQuality(true);
-                nodeSecondary.setHighQuality(true);
-                nodePrimary.setPitch(1);
-                nodeSecondary.setPitch(1);
-
-                const sourcePrimary = this.audioContext.createMediaElementSource(this.primaryAudio);
-                const sourceSecondary = this.audioContext.createMediaElementSource(this.secondaryAudio);
-
-                sourcePrimary.connect(nodePrimary).connect(this.audioContext.destination);
-                sourceSecondary.connect(nodeSecondary).connect(this.audioContext.destination);
-
-                this.primaryAudio.playbackRate = 1;
-                this.secondaryAudio.playbackRate = 1;
-
-                this.rubberBandNodes = [nodePrimary, nodeSecondary];
-
-                this.updateTimeStretching();
         }
 
 	setupEventListeners() {
+		if (!this.playBtn || !this.pauseBtn || !this.speedIcon) {
+			console.error('Missing required DOM elements for event listeners');
+			return;
+		}
+
 		this.playBtn.addEventListener('click', () => this.play());
 		this.pauseBtn.addEventListener('click', () => this.pause());
 		this.loopBtn.addEventListener('click', () => this.toggleLoop());
