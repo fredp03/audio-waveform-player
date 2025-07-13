@@ -1,0 +1,11 @@
+{
+	"id": "audio-waveform-player",
+	"name": "Audio Waveform Player",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "A powerful audio player with real-time waveform visualization, perfect for music practice, language learning, and audio analysis.",
+	"author": "Audio Player Plugin",
+	"authorUrl": "",
+	"fundingUrl": "",
+	"isDesktopOnly": false
+}

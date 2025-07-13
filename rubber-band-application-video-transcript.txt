@@ -1,0 +1,468 @@
+what's going on people can you hear me out there alright just taking a second just to get myself situated hey what's up Daniel I thought you weren't going to be able to join us
+alright okay
+just closing out some windows getting ready to go clear my console
+okay so let's see here first thing I'm gonna do is I need to see if I have a project lying around where I just play an audio file hopefully I have something around audio player this looks good this is a plugin it's hoping that I'd have one that was a simple audio player hoping that I'd have one that was just a standalone app
+so let's have a look
+this is not good try to get this to actually work here
+so okay so I'm just getting myself in the groove here first thing I'm gonna do is I'm gonna see I have this audio player I forget forget how I actually okay so let's see here I think this might actually use the traction engine this might be a little bit this might be a little bit interesting Oh hopefully it doesn't play too loud
+ooh that's very loud okay
+so let's first go down here transport transport get next audio block to fill
+first thing now I know that I have an audio player plug-in somewhere sorry just looking for a different one over a different project so let's see here
+audio player let's try this one
+it's supposed to be a plug-in so let's see we have here
+okay let's just try this see what happens
+I used with I use this with the house that's right okay so let me hook up the host if where I have it
+I have it built somewhere so just right here just trying to hook this up to the plug-in host so we have a place where we can actually build this and test it out build debug audio plugin noticed that should try that thanks for tuning in how many people do we got watching seven people thank you for tuning in so this isn't this isn't meant to be a very serious thing I have no idea if I'm gonna be able to get this to actually work or not but hopefully we'll have some fun along the way and learn a few things just thought that it might be fun to just work through this and let's see if we can actually get this thing working or start to get start to implement it so the first thing that we're doing here is we're just trying to get the actual plug-in working here so I even forget what the name of this is audio player might need to rescan this library
+so options that we're going to do this it might crash on us there we go
+so I just need to try to actually import my actual plug in here
+of course the sound twice stuff doesn't work in the debugger
+so we're just trying to get the audio file itself to actually show up now just be sure I'm gonna go back here and I'm going to just lower the gain on this a little bit so I don't blow my ears out so this what do I have here
+transport ex parte of luck so audio format reader source just want to adjust these so
+so this is this is different than I remember
+doing this before so I'm just having a look sorry
+so okay so I'm just just want to lower the gain on this just a little bit just so we have so I don't blow my ears out it's their transport ah Daniel always come in through for me so there's actually a transport that set gain where you can actually set the game great okay so let's try that I don't know if that's gotta happen before or after the actual Wow
+so where is this actual thing
+it's called audio player where is it
+just gonna scan again here I'm gonna build just for a you so not quite sure why I guess I need to do it for all to get it to pop up all these things that you learned on the fly so let's so let's try to do this again scan all available plugins so let's do this
+let's just try this again see if it works just trying to figure out why my audio player hasn't shown up okay weird so let me do this
+okay
+Oh what's this
+no that's not what I'm looking for
+it's funny how something you do so many times does it seem to work so let's try this again here ah there it is
+audio player I see it
+so just trying to get my audio player to actually play oh here we go
+audio player let's let's see here so that's all I have for my audio player there might be we might be coding an audio player on the fly here
+that's not sure how I did this about supposed to what is going on here this is so crazy
+so I actually even have anything implemented here there's an open button I actually even set it up
+oh no this isn't think I need audio player plug-in sorry about this
+need to get rid of all these old projects that are just kind of half-baked yeah I know
+I didn't just if it's suggested that I just used the juice audio player it's the thing is it's got so much code in there that it's and it's in such a way that I'd really I really don't want to use it because it's all in one header file I'm trying to I know that if I have this that it's at least set out in this organized structure that I can actually mess with okay this this this looks like it's actually a this actually works so let me do this okay now let's do cutable let's do this let's go back to occasions let's go back so welcome to the world of audio development where nothing works properly the first time around
+surprise surprise okay just gonna try to hack this together and make this work
+hey what's going on Martin thanks for joining us so okay now I need so this is audio player plug-in so once again I've got to go back and now I've got to scan this again so we just need to do the audio unit plugins
+so this so this livestream could actually be about trying to get your plugin to actually show up in the plugin host that'll be the tutorial how's everybody doing out there by the way everybody doing alright
+the nice thing about having a plugin called audio player plug-in is that it would hopefully show up at this start of the list okay so let's try and continue on we have hello Sam hello sampler could possibly work for it
+so all these fun things my confession is that I haven't even actually properly looked at the rubberband library yet so I have no idea how to how to actually link this library to into juice and it's going to be a learning experience for all of us so so yeah so I hope if I get stuck that somebody maybe Danielle or somebody else will actually be able to save me save me from doom man this thing is it showing up yet
+audio player no this is so frustrating let's keep doing this
+yeah
+digger says it's all foreign to me anyway it's actually foreign to me as well I just get it I just get online every now that it just pretend that I actually know what I'm doing you know what it is is sometimes it's just the sometimes it's just the actual confidence to to actually get in there and try to do something that you're something that you've never done before
+and and I think that that's really the that's really the purpose of this livestream just to show you like well look you know sometimes sometimes you start these things and you have to do something and you have no idea how to do it and it's just picking a point and putting a post in the ground and just saying you know what we're just gonna start from here and we're going to try to actually move forward and that's that's what I'm that's what I'm looking to emphasize more than anything is that there are so many times in development where I've had a situation and I've needed to do something and I thought I have no idea how to actually start to do it and then you just try to pick a spot or you find something that the little tidbit that maybe you found by googling online and then that gives you a little clue to start doing it or you just have somebody like Danielle hanging around all the time that it's able to just say here's how you do it you got it completely wrong so yeah so this is uh so this is gonna be a learning experience and this is this is what I want more than anything is to show like hey we could just put the camera on and we can just work together towards actually making this work together so hey what's up Martin big shout out to Carlos as well think thanks for joining in today and and I hope that I hope that we can help each other and that I don't disappoint and I could actually get something action
+working or at least leaked to get so my goal for this live stream is actually just to get something to actually link and actually where I actually called the header and I'm actually able to I'm actually able to create a rubberband object and that it actually knows what I'm talking about that's that's the goal for this but if we can actually get it time stretching that's really cool as well so and hopefully it's not written some sort of antiquated version of C++ that has all of this syntax that I don't really understand ah
+audio player plug-in hey what's up Corey thanks for joining us no you haven't missed anything actually you're joining right on time and we are just trying to get this audio player actually working so this the audio player that created ages ago
+and hopefully it's actually hopefully it actually still works and that I'm actually able to get some audio actually playing through so the first so the first step so what what I'm trying to do just to start off is we have this audio player it's just gonna open a file gonna play some audio then I'm going to clone the rubber band library and actually see if I can actually start linking the library and trying to use it to manipulate the audio itself so okay that's very loud in my headphones but it works that's fantastic that's a great start right there and hopefully this all this won't keep showing up so I'm just going to save this host so I just call this test and now soundToys and some other companies don't actually like it when it won't actually let you
+attach a debugger so that's why you get that but we actually have something that actually works now my suspicion is if I go back to plug in processor is that in the process block oh I thought that I actually set the game where did that set the game at oh I did that in the other project so now the question is do I just put it below or before the get next audio block transport I'm going to I'm going to take a chance here and say that I put it before so transport source set gain we will multiply this by 0.5 ooh oh hey Sam how's it going great for joining it
+thanks for joining us
+yeah I oh thanks for the tip Daniel so he says it's a setting of source it doesn't actually even need to be in process block which is okay so we'll do this
+I guess prepare to play would be a good place to actually do this and yep
+thank you very much Daniel and Sam so what I've heard from Zanna kiyose who's in the discord is that real-time time stretching is actually quite difficult to do but we'll give it a try I mean I don't know I'm I'm gonna just try to get it actually working okay so that actually that was a bit softer but I'm actually going to turn it down even more here and see if we can actually get this to to actually work so I loved that little feeling of success where you actually get something actually working here
+I'm actually okay I know them
+I haven't released something properly so I'm gonna actually turn this down even more just want to make sure that I'm not blowing everybody's ears out is that is that volume okay for you I don't want to I don't I don't want to blow any eardrums out today there that feels that feels acceptable to be okay so old master source so let's see here hmm
+so I just need to get rid of this okay so okay cool so we have some audio and it's actually playing okay so now let's go to let's go online here let's see
+so it's rubber band time stretch so you get oh I hope not
+oh that's a great point
+ya don't want to modify the juice source code Thank You Daniel you're a lifesaver so so we're just going to actually get this and we're going to clone it so there we go and what I will do is I'm going to CD into the library or into the directory where my actual plug-in is and then I'm just going to clone it there so we can actually clone the library download the library using git clone and then put in the link and now it's cloned so that looks good and now is the next part so the question is is there a readme ok great
+so here's a readme
+so let's have a look and see what this actually says so this is licensed so we have rubberband command line tool using the rubber so we want using the rubber lamp ban library as a public API to consists of one C++ class called rubberband stretcher in the rubber in the rubberband namespace you should include to use this class there's extensive documentation in a class error well this sounds as simple as it gets
+now let's see if it actually works
+this is where the fun begins
+so now this is going to so I think I need to go back into the juicer now and actually add this to my header search path and where it's that in here that our search paths all these menus
+I always forget where it's actually at so header search paths okay so I think that if I just so let's go back to the readme so it was called rubber band rubber band stretcher dot H rubber band so I think if I just go here I think if I just take this and drag it like that then I think if we rebuild then I think if I paste this back in here so the first thing let's see if this actually finds it Oh doesn't find it so one someone above Daniel says okay so let's just try that
+it's looking good it's looking very good so here we go
+Danielle's a lifesaver
+yes bill succeeded
+okay so that's cool that means that we have indeed found the head of the header file so the header file is where we actually are able to actually call these functions so now it's a matter of digging in here and checking out the documentation so so we have one header so processing options for the time stretcher so we could set options in the constructor or as bitwise or as option flags the default value is intended to give good results in most situations flags prief flags prefixed determine how the time stretch will be invoked these options may not be changed after construction and okay so there's offline time stretcher and a real time time stretcher
+okay so processing setting will depend on architecture so we could do offline or real-time then we have can you'll see that okay just what I'm gonna make it a little bit bigger just reading through this processing what's what it's actually saying options stretch
+Pro control the profile used for variable time stretching always a just stretch profile to minimize stretching a busy crowd okay cool so Wow
+whoa
+he wasn't lying when he was saying this documentation is his is actually pretty in-depth oh thanks thanks for your help Danielle okay great so it's Lisi
+okay so we got rubber band rubber bands stretcher we just got to give it a sample rate some channels and then an initial time ratio initial pitch scale so constructed to give to run at a given sample rate processing options in the time may be provided pitch and time ratios okay yeah exactly so big shout out to Marva atronics and he was saying that he that he actually creates the instance and prepare to play yeah so that was one of the first things that I was thinking is how can i construct this what because the the app isn't actually going to know what the sample rate is and the channels are until you're in runtime until the app is actually up so this sounds like this needs to be a unique pointer so let's just start there and see if we can actually create this so we got unique pointer and then it is of type oh no I lost it I should probably put this in a tab where I could keep going back to it
+so so yeah so what we need to do is we need to put this in a pointer and the reason for that is because we aren't actually able to give the we aren't actually able to tell the rubber band stretcher what the actual sample rate is and channels are until the app is actually running so so what we need to do is we can now go back to our unique pointer and this needs to be in the rubber band names namespace and I will just call this RB and then now I'm prepare to play what we could say is our B equals stood make unique so now what we're doing is we're actually allocating memory to actually create this rubber band time stretcher and then now we just need the actual arguments so now and what we can see here is that we have these last two options which are we have like these default values so what this means for people that are just starting out is that I say people just starting out I'm just starting out as well so that when you have an equals like that that's in an argument that's this in your declaration that means that this is these are optional okay so these are optional and we can change these if we want to okay so I'm just going to paste this here so sample rate is going to be sample rate and
+four channels I think it's getting numb input channels or turtle.turtle numb so get total numb out put channels then we have this options so let's see what options is like so we see once again that this is an optional parameter so if I command click and we see that there's this options so let's just have a look through here
+I'm just looking for what the actual oops so let's let's click on default options see what that actually means so we got these preset options default options so let's let's see what it says about default options so the default value default options is intended to give good results in most situations okay so that's fine so going back here so I think that I can call this because I want to set different time ratios and pitch and pitch scales so so we can actually hear a difference in the actual time stretching or pitch when we actually put it through it so I think I could call this rubber band options so let's see here so how can I call this is it preset option on
+rubber band rubber bands stretcher preset option default options okay so once again for people that are starting out so think of this as like you know when you have like when you're doing an outline oh I hope not only Americans know what I mean by an outline so like let me just pull something up just to show you what I mean just want to help people out that are just starting here so you know when you you have these things called outlines right so you might say title is rubber band right and then within that you might have something like like you can think of this as like a chapter right so you can think of this is like rubber band stretcher gonna make this a little bit bigger so you can actually see what I mean so this is for people that are just just starting out so so when I when I'm doing something like this this just means that I'm actually like going in kind of chapter and then you might and then you have rubber bands stretcher and then you might have preset option and then in there you have default options and then you have like this other one I think it was called like percussive options okay so that's that's all when I'm writing that that's all that means is that I'm just I'm just kind of going through it it's almost like XML in a way okay so that's that's what that means when I use these and this is called a scope resolution operator
+okay and what that means is that rubberband stretchers within rubber band preset options within those okay so I think I've beaten a dead horse on what that is now so initial time ratio let's just put it to like zero
+five and then initial pitch scale we'll put this to 0.5 as well just try that okay so now we've allocated some memory on the heap okay once again just helping people out that are just starting the reason that we need to do this is because the rubberband stretcher needs to know what the sample rate is and how many output channels we're putting out to and the only way that it can know this is if the app has already started and that it's already running so that's why they call it that's why this is called dynamic memory okay because we are allocating it during the time that the app is actually running we're not just creating it on what's called the stack okay so these like if we look at these file and these other things that we're just creating these objects so they're created on the stack that means that they're actually just built when the app actually starts okay so that's that's what that means so if you're ever wondering a use case of why do you use a pointer that's one reason why you might want to use one okay so okay great so now we have the this and so now we need to look and of course we're thinking about how do we actually input audio into this how do we actually put our buffer into this but let's just keep let's just keep working through the the header file just to see if there are any sort of additional parameters that we need to actually set so we have this reset the initials stretchers initial buffers
+okay and I feel as though I want to call this here maybe I'll come back to this later
+just to clear out any sort of so I'm not exactly sure how this rubberband stretcher is actually how that DSP is actually working internally but one thing that I'm thinking about is in a DSP algorithm typically and I say this as a complete DSP novice okay so I'm not a DSP person but typically what you have is when you're doing some sort of DSP algorithm what it's doing is you have these floating point you have these floating point values that are in your audio buffer and what you have to do is you're taking you're taking each value and then you're doing some sort of calculation on each one of these values now these you have these kind of feedback and feed-forward type operations that happen sometimes in filters where what happens is that it does a calculation and then what it needs to do is it needs to hold that value in in a variable temporarily and each time it does the operation then it takes that temporary value and it replaces it with whatever the last value is and then it might take that that temporary value and feed it back into the algorithm again
+okay so reset normally normally in a DSP algorithm you have some sort of reset command and what that does is that basically zeros out all of your all of your previous values all of your temporary values
+so you're basically back your equation is kind of clean again
+okay because if you imagine that you're playing audio through your plug-in and then you stop you stop playing well those values are gonna still those previous values and all those values that you need to hold and feed back in or feed forward or whatever they're going to still be in there so reset just takes it and zeroes it all out and just makes cleans out the equation again okay once again I'm saying this as a person that is not a DSP person but kind of understands the basics of it okay so that's my interpretation of what's happening with
+sat there okay
+resets the stretchers internal buffers exactly okay so let's continue on now and so so now we've got set time ratio okay so we can we can we've already done that
+okay so we've already we've already kind of done that in our when we've actually created it and we can maybe come back to this to see if we can use some sort of some sort of parameter to actually adjust this okay so okay so so our friend Marv atronics has given us has given some some advice here so we have available okay so let's let's follow Margo Tronics direction here so you have this available and where where is it okay cool
+so so here we go
+hey let's go honk easy with King Ches Ches Weller I recognize you I think from Instagram how's it going thanks for joining us so okay so if you're just joining us what we're doing is we've actually said we've actually successfully linked the library we've actually created the rubber band the rubber band stretcher dynamically as a unique pointer and now we're looking at how to process it so we have so we have this available so that says ask the stretcher
+how many audio sample frames of output data are available for reading so via retrieve so we have this other function called retrieve so let's see what retrieve does
+just need to learn how to spell here so we got retrieve okay so obtain some processed output data from the stretcher up the sample samples will be stored in the output of raised one per channel for the interleaved audio data the return value is that the actual number of sample frames retrieved note that the number the value of samples and return value refer to the number of sample frames which may be multi-channel not the number of individual samples for example one second of audio sample at 44100 yields a value of 44 100 not 88 200 okay so this applies so this is samples per the samples per channel right so so now so basically we have this retrieve so let's let's just try this and it appears that this needs to be in processed block so going down to audio processed block and forgot what I've actually done here so just gonna clean some of this up here this annoys me okay cool so so let's just try to call this and we have our be retrieve and we see that it returns that it returned how many samples that we can actually use here so now we have our output so this takes a float cost so samples we already know this this is going to be buffer getting them samples okay
+and
+so I believe that we want to get a right pointer here
+so for Channel Zero oh you can actually oh this is this is interesting so our friend Marv said that we can actually use we can actually get all of our all of our right pointers so we could say buffer get array of right pointers so this returns an array of right pointers so we need to actually we need to go up here Auto right pointers equals whoo
+I didn't mean to build there okay so now we have right pointers and then we go Auto what we call what we would call this samples available so nothing's yelling at me at the moment so which is good and now we need to go to so let's so this gets our this gets our buffer into the rubber band and now sample
+samples available from stretcher okay I'm gonna follow this guy clearly knows what he's doing here so I'm gonna do samples available from stretcher and so so this determines how many samples we have available and then now we have this function available ask the stretcher how many audio sample frames are available for reading okay so we have so it's available so yeah yeah so so this is how many so let's see so this is supposed to so this is supposed to be after the fact right so this is where we're actually getting the this already been stretched and we want to do something else right is that right so okay so I'm just gonna follow this guy's instructions here the outline of the process is ask
+that's stretcher available if not enough available processed data through the from the input buffer okay
+so although I'm trying to think about what I'm thinking about and trying to think about what he's thinking about at the same time so so this is what Sol samples
+okay so samples available from stretcher should be this right Auto samples available from stretcher equals R be available right and then
+yeah
+so okay so so I don't one thing that I don't understand is is it retrieving so it's obtained some processed output data from the stretcher so yeah so what we're doing is we're putting the right buffers in the we're putting the array of right pointers in and then this is supposed so isn't retrieved supposed to be really like rubber band output or something like that
+it's so
+oh so retrieve its after process
+okay so retrieve is the last step okay cool so so it's find out if there's any samples available if there are samples
+so if samples available from stretcher is greater than zero then would it be like our B process does that need to right the stretch or processing loop so okay so
+or
+so what I'm not sure what you mean by by invert it so samples amount required for output
+so okay so while samples available amount required amount required for output so what is how many samples you need to write into the main output buffer so but that would be buffer that would be the number of samples right so so while samples I'm not quite sure let's let's have a look here so I've gotten I've got a little bit tangled up here so ask the stretcher how many audio sample frames are available for reading
+okay so retrieve is at the end and then okay so it sounds like so what's
+retrieve return so it sounds to me like our B output needs to be declared as a member so let's let's see so a stretcher how many audio simple frames of output data are available for reading this function returns zero if no frames are available this usually means more input data needs to be provided if the strip but if the stretcher is running and threaded mode okay
+so let's so let's look at this first
+okay so we have OOP that's not that's not what I'm looking for so let's go process let's look at let's go let's go with process and then let's try to work our way backwards from process right so process is where it actually happens read process I'm not sure what you mean
+so from
+a block of samples for processing input should point to D interleaved audio data with one float array per channel sample values eventually expected in the range of minus one to plus one samples supplies so we need the read we need to read the input number of samples right so this this seems so here I need to go for less then buffer getting out channels oh yeah see you're doing a little bit differently then so so although I've never done it like this before this is this is really interesting so we got the read pointers which is our input right get array of read pointers so here we go read pointers buffer get samples okay so I think I'm doing that right now we just need to set final to true if this is the last block of data that will be provided - oh I'm not looking at the right set true - final if this is the last block of input data okay so I think that's true sounds true to me
+oh just told I was just told that I was wrong okay so okay great so that so that's right I know that's right
+so now it's just figuring out this last this last step here okay so this is the part that's confusing me here
+so while samples available from stretcher so let's go back to available
+where's available at okay this is this is the one that this is the part that I really don't get that's the stretcher how many audio sample frames are available for reading via retrieve this function returns zero if no frames are available this usually means more input data needs to be provided if the stretcher is running in threaded mode
+it may mean not a depth not enough data has been processed
+okay so stretcher has zero samples of latency requires a certain amount of input before the output appears okay so
+yeah so at first you will be filling the stretcher from your input buffer yeah which is which is the read
+which is process right so I'm just gonna ask our friend Marv so I think you'd thank you tomorrow for actually giving his for actually helping out here so process is is putting so this doesn't even need to be in this wildly right so so we have so we're going through it's reading the audio and then now it needs to determine yeah so
+so get next audio so this should be our B output right oops that's not right not quite not quite there yes yes so so this is fine right and then here I need to have some I need to have some sort of loop right so so this needs to be something like if samples available from structure is or should be something like if blank is less than samples now if if this thing is more than samples available from stretcher just just thinking here then we retrieve
+is that for use is that used in a granular synthesizer I don't know if it's that's a good question Ches Weller I'd I mean no I don't think so so granular synthesis from my understanding is taking a sound I guess it I mean you're talking
+if so granular synthesis from my understanding is taking taking a stream of sound and breaking it into little grains right so little pieces and then using that synthetically so that I think it might use a similar process to this I don't know see that shows you how how much how little I actually know about DSP so okay so what's this blank thing this is the only this is the only thing that I think that we're I'm not quite sure on so what else so what else do we have here
+so what's this study provide a block of samples from the stretcher to study and calculate the stretch now so this this is not this is not what get get samples required this looks more like what we need
+ask the stretcher how many audio frames should be provided as input in order to ensure that some more output becomes available if your application has no particular constraint processing block size you're able to provide the block sizes input
+yeah
+so let's see so so my last so this is the part that I'm not quite sure about so so here's so here's the process right so let's just walk through this again so we have a read pointers which is kind of our input right we have our write pointers which is our output now what we're doing is we're actually taking the we're actually taking the audio and we're actually letting rubber band read the buffer right and then what it's going to do is that it will actually process it and then it will output this RB output which we still need to figure out how that actually will get into our into our outlet so so now so now the only question is so it sounds like we need to do a check to make sure that we have enough samples that are available to process in the stretcher before we actually go and retrieve it so the two questions so so the two questions are what is this thing that we need to check so we've got samples available from stretcher which is available so this function returns zero
+if no frames are available so this is so the return value returns to the number of audio sample frames not the number see this is the part that kind of throws me off a little bit so number of audio select let's so let's just go so what I'm gonna do this isn't going to output anything right I just want to see what samples available from stretcher is is outputting alright so let's see so what we'll do so you're not supposed to console out in a process block but I'm going to I'm going to try to do it here samples available from stretcher ok so what I would expect is that samples available from stretcher should give us something like 512 or something like that or 1024 and I think that it's supposed to be something like if buffer and get number samples is greater than sample is less than samples available from stretcher then process then then retrieve call available after process
+oh so this goes after process yeah yeah
+so so what I'm gonna do is I'm going to just comment just make a console out here available and we're just going to see I just want to get an idea of what boot this is
+what's happened here what's happened here hmm
+symbols not found this is not good so okay so let me alright so what I'm gonna do so I'm just gonna comment hold this out I'm gonna actually go back to so it looks like I'm getting some sort of so it looks like I'm getting some sort of linker error and linker errors are just the worst I need to include the source it's not compiling yeah oh it's not header only I thought it said it was okay so let's okay
+so
+okay
+so okay we've missed something that we need to link so oh man some multiple instances okay so we're so where's the source let's look here right so yes so we have all of these methods right so we need to include the source code so that's where the headers are so that's where the main is so I don't underst where so where do I need to include that I do
+so let's see there's something else that I'm missing here so let's just go back to let's go back oh here we go
+I don't know how to do that sources and the sources in this source folder okay if you prefer here we go if you prefer to add the rubberband library files to an existing build project instead of using a make a file the files is source and the API header should be all you need so do I need to include all of that whoo
+so I need to include every one of these no way dude oh my god
+or is there just one that includes all of them yeah I don't know how to do that yet though using the make file okay
+so sounds like so so all of that all of the headers right I have to include all of these headers okay miles we'll get started so man
+there's loads holy moly
+is that right if you prefer to add the rubber bit the files is source it's rubber bands stretch are done rubber bands stretcher cpp yeah surely there must be one that includes the rest of these doesn't look like it though
+yeah I could try that okay so let's just try putting the source file in the header search path of the producer so where's this what do I need
+semicolon there or comma Oh tell me here use semicolons or new lines okay
+for just add source is another source folder in the produce area and click compile okay so let's try this please work
+I don't want every I don't want to include all of these it looks looks like a winner things thanks for your time Marv okay it's compiling it's blinking uh it failed
+okay so let's look and see what happens so it looks like it's still failing okay
+so I've tried putting the source
+try putting source in there what about so I included rubber band but if I include if I included the whole library it should so good a file explorer oh I get what you mean
+okay so let's drag this in here okay now we should be able to get rid of all this okay so let's try that now no oh but audio curve audio curved calculator so one good thing is that we're getting less errors than we were getting before so that helps
+okay
+DSP audio curve calculator source DSP okay so it's there so do I need to maybe put it in the header search path and so I put it in there so now do I need to do this as well which is like this okay so let's try that now okay
+so where is so drag this in source let's see here I'm gonna try I'm gonna try something crazy here so just remove this I'm gonna try this very quickly
+no still didn't work man
+ah but I don't need the window stuff so let's see oh man
+kind of lost now
+okay so that was that wasn't the answer okay so not quite sure what to do here
+so we thought that it be
+so let's go back here so so if you prefer to add rubberband library files to an existing build project instead of use the files in source except for rubberband stretcher J&I cpp and end and the api headers in rubberband should be all you need
+ah so looks like maybe I need both of these so looks like I might eat this and I need this it's let's try this now
+if this if this doesn't work kind of out of answers
+oh man it's still not working
+okay so why it's not quite not quite right so let's see here
+hmm okay let's let's go back to the beginning just to make file according to your preference for compiler platform SDK the default is to use the accelerate framework and then run make dash F make file
+OS X library in the terminal to build you'll need the Xcode command-line tools installed okay let's let's just try this okay
+I'm gonna I'm gonna try this and try a different way here so what I need to do is I need to go to the command line and then
+I'm gonna go here
+now we're gonna call this
+okay it's doing something
+oh no it's not doing what I wanted to do actually it's just it's just making a copy of absolutely everything that's not that's not what I wanted to do is it hmm
+so what's it just man
+so what's it done here
+Nick filed that PO sx library in the terminal window to build okay is anybody actually still watching this hey what's up everybody buddy
+so I'm actually I'm actually a little bit lost at the moment so I hope you don't find think thank you very much thank you very much Turk so I'm I'm a little bit yeah I'm a little bit lost at the moment
+I've never Oh build dynamic libraries anyway okay so what I'm gonna do is I'm going to I'm just gonna do this for a second sorry if you hear my dogs okay so I'm lost but I'm I'm trying to trying to make it trying to make this work here so CD so let's go let's go back here for a second let's go back to what we were doing before so we're gonna clone it again right so now
+so now I need to include the source files somehow that's the question now is how do I so we just need to go back to the documentation so let's go back to the readme again here so this is so this is where so much my confession is that I've never actually I've never actually done this part before so this is a little bit this is the part that okay
+fill the command line so build dynamic libraries only so so run make - after me okay so let's just let's just have a look together right so I don't I mean that the real the real answer here is I don't know about this part okay so so essentially this sets you the situation at the moment is that I've successfully linked the header file the the the header file of rubberband and it sees it but now what I need to do is it's not finding the other source files so according to Marv who left a couple minutes ago what I need to do is I need to find a way to include the source files which I tried to do and that's and it still didn't quite get me there or I need to use the make file to build a dot Lib and so that's what we're going to look at now right
+so I've never done this before or I haven't done it I have actually done it before but
+forgotten how it actually where it actually puts the where it actually puts the dot lib so so let's see here so this is this is uh this is real development right here is okay I don't know how don't know how this part works and I just need to figure out how to actually run this so the make this Oh
+so it actually just installs it oh really
+okay so let's let's just try that so and there was a flag there was a flag that we could use as well which was where did my where did my actual readme go so
+so if I just put dynamic does that mean that I just Boop
+or was it - dynamic or - - dynamic
+did it do it
+no that's not it
+so so tribe dynamic
+but did this I did this before and it worked right which was which was this command where is it
+building on OS X so which was this make dash F make file OS X library and that and that worked
+oh I need to CD into the right into the right place sorry
+so that could explain why the dynamic part didn't work so so now let's go back to this one and then - - dynamic hot Denmark okay so all right so let's let's try this again
+so it's so I can see that it's making it right but once you're once you've done making the library where do you actually see so where do you actually link to it Lib
+so there was it looks like there's an error live rubberband a Lib oh man yeah this is this is the part that I'm not too sure about unfortunately yeah because it's just not finding this why is it so this is an audio curves spectral difference audio curve
+H
+yeah but it's there
+why don't understand why it's not seeing it so ok so let's go back to all right I'm gonna try this sometimes this works
+still not working
+yeah I remember having so many problems with this and yeah it's just not finding it
+oh I don't know see I thought what's going on here
+okay framework search paths external libraries - link so this will be looking for like a dot Lib oh man where is it
+header search paths yeah
+don't know if that's that's actually dang I'm a bit lost man
+is
+and if you prefer so this is what I was trying to do the files in source and they be okay all right man I'm gonna try this it should be one there should be one file though that so is it that I need to include every single one of these oh man
+it's crazy
+yeah I tried to tried to do this it didn't work man
+yeah these are all independent of each other so they wouldn't stretch it so I don't know yeah I don't I really don't know yeah man really sorry about this I really I'm really kind of lost here really lost on what to do
+thought that where is it
+yeah
+got a live directory
+I've got a actually got an error when it actually happened said
+so make - f make file dot OS X all
+snd oh there's there's something I need to install where's the readme where is there was something I just saw the SMD library so is that on Humber maybe it's let's to try this
+you
+snd file
+I'll live
+snd file
+I thought it was homebrew install
+oh it's brew isn't it brew install uh-huh
+looks like looks like we got something happening something's cooking something is cooking we're doing something so homebrew is installing this library that we needed so just to update people or is anybody actually still watching
+so my live stream so what we got so we got so we actually got you
+wow that's pretty cool
+so just update that the people that were that are wondering what the hell is happening at the moment so we see here so it says the default target is to build static and dynamic libraries using the command line tool the snd library is required for the command line tool okay so what happened was I was trying to build I was trying to use the make file to build the library but it was saying that I was missing this nd library so now let's go back and try to do this
+okay so vamp vamp SDK vamp SDK so what is that vamp SDK umbrella so here we go so have no idea what the hell these things are
+it's a brew install vamp
+so rule install
+vamp plugin that's DK okay is this actually gonna work okay cool so it's so now let's go back so so basically what we're trying to do is we're trying to get this to it's a link okay but I don't need to so let me let me just try to do the dynamic library nothing can be done for dynamic okay static nothing can be done for static I don't understand here but it works it works if I use all check the Lib directory
+oh oh it's there okay
+now okay we are getting somewhere
+now we just need to get this I remember this being a nightmare
+so there's actually an interesting trick here which is that when you're trying to link a library
+you don't actually add the die live at the end so if I remember that if i remember that correctly fingers crossed this will actually work now build failed okay but we are getting we're getting into the right area there was something i remember there being something about this so let me let me just yeah i remember there being there being a little trick here that was driving me crazy
+yeah there was like a live oh oh I remember now
+you don't put live at the beginning so it's either rubber band or its rubber band die lib okay that let's try rubber band dot toilet ah still not doing it damn it what the hell is going on here okay it's I'm close though I think maybe I need to put it here something like this so let's try here
+what if you write the full path to the library including library an extension yeah yeah
+so so if I put if I put it here in or do i I remember there being a trick that I needed to do here so let's try the static library I definitely remember that you don't put lib at the beginning of
+damn so okay so let's just try let's just try linking to it in here so let's see here so we've got include so what's happened okay cool so we know that it's not finding it
+so it's so it's actually a so it's actually a linker error that it's not finding the actual library the actual source files so well let me try this so let me try and cluding lib rubberband okay
+Khalsa gave me audio coder complete which is yeah okay so it found it now but it's still not finding this is still not finding this header file I have no idea what's going on here so could it be that I have this just need to remove the reference from the references from this so that it's not trying to read from the source files okay okay so source file is not what is it saying source file is not valid utf-8 what does that mean
+invalid name from my marker directive thanks Rob
+huh that's exactly what my life looks like hahaha yeah yeah
+we are close though yeah so this this isn't working now just remove this path and move it to header search path in the juicer file yes okay let's try that
+so here okay get rid of this extra linker flags
+okay this is so confusing
+linking libraries is such a nightmare thank you to Maria for helping me out with this
+please leak it looks like it's doing something it succeeded I can't believe it it's actually succeeded of Maria you're the best I was so lost I woulda never figured that out oh my goodness oh man how did that oh what the world how would you ever know that how would you ever know that you're supposed to that you're supposed to put that in linker flags and not in extra libraries to link how how in the world oh I can't believe it
+it actually works okay well let's go back to what we were originally doing this will be like the ultimate success story big up to Maria for helping me out with this oh you saved my life I was lost for so long okay so now what we're doing is we actually need to figure out how to get this library actually working so so basically to bring everybody up to of the speed I'm just so happy that it actually linked thank goodness I would have been so disappointed if I had to have left this livestream without the library actually successfully linking so so now so our friend Marv from earlier said that what we need to do we we have this process method the
+actually where we actually input our read pointer so the read pointers are read access only to the audio then he said this is a part that was a little bit hazy that I was actually not quite clear or sure about we have to make sure that we have enough samples available in order to actually output actually output they actually do the processing and if we're actually able to do the processing then we get we basically get our output and then we somehow have to take this output and we have to put it back into our buffer so I'm not quite sure how that's going to work but the last thing that we left off with was that we weren't sure how this how this samples available from strecher actually kind of fit into the bigger picture so what I'm gonna do is I'm going to console this out and see if the number so my suspicion would be that this would Sam samples available from stretcher would give us some sort of oh look at this
+samples available from stretchers so we see that this is actually increasing so this is this is actually doing something very interesting so we have so it's just counting counting up and up and up and up and up so this is cool in that we see that there's something actually interesting happening here so my my suspicion here is
+that what we need to say is something like if buffer get samples is less than samples available from stretcher this is just complete this is just complete like intuition here then we get some data from our stretcher and then we try to put it into the actual into our output and then this should be else and I guess if we do that then we could just maybe put our regular output out I don't know like maybe maybe we don't put anything out right so this is the part so this is the last I hope this is the last piece of the puzzle which is we have this our B output so if we look at the retrieved function this returns obtain some processed output data from the stretcher up to sample samples will be stored in the output arrays so output arrays so this means that this is an array one per channel for D and relieved audio data pointed to by output ok so this
+I don't know let's try it so this so one for each channel so yeah so now we just need to somehow be stored in a race sample one per channel so pointed to by output so so for I'm gonna try this for INT i 0 i is less than our B output I thought it might be our B output that size so our B output so let's have a look at so our B output is in law is an unsigned is an unsigned long so do I just do this
+see so this is gonna give us a right this is gonna give us our right pointers back right pointers get array of right pointers it's going to return a float star star now this is this is what I don't quite understand is how to get this back into the output let me just open my window so now now it's this final piece of the puzzle that we need to figure out sorry about my dogs by the way
+okay so process puts the audio in then retrieve gets the value back out see this is
+yeah so retrieve gets so retrieved gets the result of obtain some processed audio data from the stretcher pointed to by output this is this is the part here that I haven't quite figured out so Oh okay so the return value is the actual number of sample frames retrieved so we don't actually we don't actually put that so this is just telling so this is just telling us how many samples have been retrieved note that the value of samples and the return value refer to the number of audio sample frames not the number of individual samples no so so
+okay so let's just listen let's have a look at what retrieve actually consoles out right so let's let's do what we did for so this is wrong so I thought army outfit was an array so let's do our good deed buck this is gonna be our be out so I'm gonna just want to see what it's actually outputting
+so it looks like it's just giving us the number of samples that are actually output I mean
+so it's okay I'm just gonna try I'm gonna just try playing him to see if it actually this is actually if it if it's actually coming out stretched or not hopefully I'm not gonna blow any ears out here so just if you're listening on headphones just turn them down okay cuz I never know what these things are gonna okay that was interesting that was interesting what was it doing there
+what's that about
+okay so let's so let's go back to prepare to play and see so that was 0.5 and 0.5 right so I'm just gonna try to play it at 1 see if it actually see if it actually plays oh oh we need to do something else as well which is oh I've got rid of I got rid of this yeah just make sure if you're consoling out in your audio block that you actually commented out or delete it before you actually play it or else it will you'll get some sort of stuttering so let's see here
+hmm that's interesting okay so let me I mean is it working
+hold on list so now we're going to play it at twice the speed and let's just let's just see if it works by the way thank you for thank you for sticking around everybody that's been sticking around and hopefully this will play twice as fast
+it sounds faster than I know you can't I know you can't tell but I actually made this track so I so I actually know that that feels like it's going faster than what it normally does okay so let's try it again
+I don't know
+I'm not telling the difference here so let's try zero let's try something just drastic right see see if it does anything okay so so now it's now it's going slower right but that's not exactly what was supposed to happen sorry
+where's the constructor for this initial pitch scale so
+set time ratio so it's not so it's doing something but it's not it's not quite doing what I anticipated just gonna try it again
+okay
+so clearly there's some sort of processing something that is not quite right okay so let's go back to 0.5 so now I mean the the good news the good news here is that something is happening right something is happening now the question is what is going wrong here so let's see so we're getting there we are getting there
+so let's see here
+run
+stretcher and offline mode so option process real-time run the stretcher and this mood only process should be called so what so what mode did we actually call her free so so did I call any options
+so oh so it looks like I need to do something else that I've done I haven't done something here so let's go back here option process so let's search for that option process uh-huh
+okay so option process real-time okay so where do I actually set that
+set pitch scale so there's there's one enum called option and then there's one called the options okay that where so where is where do we actually set these options options okay
+mmm
+oh I'm I'm sleeping at the wheel today this is preset option not options so how do I use this okay so now let's go back to the constructor feel like feel like I'm getting somewhere now so we've got default options
+okay so default options yeah you're telling me
+dusty tracks wouldn't it be cool if traction engine actually had this sort of documentation that would be like really cool so I'm gonna try options option process real-time
+so I'm gonna try this no idea if this is gonna work about okay so it hasn't really done anything just gonna try this again okay so put that pretty extreme let me just try try this again
+oh that sounds something like what we're looking for
+okay I'm just gonna try something very quickly here which is going to get rid of all this stuff and I'm just gonna try to straight-up process it see if it actually see if it actually works
+okay so okay so there's clearly some sort of there's clearly some sort of some sort of process there's some there's some step that's missing here which is that I need to make sure that the samples available from stretcher is so we need something in here
+so I feel like maybe there should be like this
+okay okay not getting anything okay
+so ah
+I see something I see something is coming out here ring buffer read 512 requested only this many available okay so we are getting there though
+okay so let's go let's go back right so I feel like it's getting close so let's see if it consuls out any sort of other interesting stuff
+I still have anybody watching let's see here
+hey we still have 15 people watching thank you very much so
+so let's try this let's go back here okay so there was something there was something that was happening there right samples available from samples available from stretcher so
+this is actually getting output from that's not what we want right I thought it'd be buffer getting them samples
+not quite there was something interesting going on there when I had this it was giving me so I feel like there's something else one more step that's missing here so
+let's see
+ask the stretcher how many audio sample frames should be provided as input to ensure that some more output becomes available if your application has no particular constraint on processing block size you are able to provide any block sizes input for each each cycle then your you were able to provide any block size as input for each cycle then your normal mode of operation would be to loop querying this function providing that number of samples to process and reading the output use reading the output using available and retrieve so this feels like it's getting towards what we need normal in normal mode of operation would be loop querying this function get samples required providing providing that number of samples to process then reading the output using available and retrieve ok so the only thing is that we can't just give it my understanding is that we can't give it just any size any block size is that the sample is that the buffer size is set by
+so so juice process runs the plug the process block in blocks of samples so we aren't just able to give it just some sort of arbitrary number of samples that we want it to process that's my understanding so if anybody thinks I'm wrong about that please please correct me so but this gives me a clue into what what needs to happen here
+sassette set max process size note that this value is only relevant to process not to study
+so what study study where is this
+okay if the stretcher was constructed in offline mode the time ratio is fixed throughout operation this function may be called any number of times between construction and the first call to study or process okay so that set time ratio if the stretcher was constructed in real time move which is what we've done the time ratio may be varied during operation this function may be called at any time so as long as it is not called concurrently with process you should call this function from the same thread as process or provide your own mutex or similar mechanism to ensure that time ratio and process cannot be running once okay so we're getting we're getting there I feel like we're getting there
+so where is study
+okay where is this actual function I don't actually even see any function that we can actually call called study let me just do this go back here and just say RB study so provide a block of samples for the stretch so what so let's see here I'm gonna turn on my light provide a block of samples for the stretcher to calculate a stretch profile from this is only meaningful and offline then okay so we don't need this okay
+okay so let's so let's go back here so
+a stretcher
+how many audio sample frames are available for reading via retrieve
+this is what I don't quite I don't quite get what it's saying here ask the stretcher
+how many sample frames audio of output data hey Marv what's going on man our Savior Marva is back so we've actually gotten the library to link which is great news and we've actually got output we're just trying to figure out that last step which is back in the process block where we are trying to trying to figure out what to do here
+so we have so we have process which is taking our input and now and now we're just trying to figure out what what what needs to actually happen here so so getting it out to our buffer is the last step right we know that so I was just trying to figure out okay so there needs to be some sort of line of code which is like if so in pseudocode number of samples available
+is less than samples available from stretcher that's what that that's essentially what that should look like right that's what my understanding is so I thought that that would be if if buffer get number samples is less than samples available from stretcher no okay so I did this interesting I did this interesting thing where if okay so if samples
+okay so Marv says if samples available from stretcher is more than samples required so sample is required to output would be so should be this right
+less if samples is less what that doesn't I don't quite understand that
+samples if the number of samples that are available from the stretcher is less than buffer okay don't think about the code I have right now think about the flow of that okay so we've got our input coming in yeah yes so we've got so we're taking the input and we're putting it into the rubberband process now what we have to do so Marv asks does the stretch bucket have enough audio to fill the out bucket
+so samples does stretch bucket have enough audio to fill the output bucket now process more
+so process so process should go so from what you're saying process should go after we're looking at
+okay gonna go back to the documentation here
+so is your flow transport source stretch up no no my flow is whoa
+yeah yes and my flow so my flow is the transport source transport source then we're looking to see if it's still playing and then if it's still playing that we're putting and we're putting the audio information through the stretcher and then we want it to come back out of the output buffer
+so this is so we want to
+so this so from what you're saying this should maybe be a while loop so while so we're figured so
+so we want the samples available from stretcher to go down to zero we fill up the stretcher then we retrieve it them then we retrieve it out of output but how
+so how do we query the number of samples so so how do we query the number of samples that have already gone into the stretcher so what we do is put a separate buffer in front of stretcher
+you
+so well I need to create another audio buffer
+so copy
+okay so sounds like we need another audio buffer so then
+so here I need to do and temp buffer set size and get total num output channels samples per block is that right in samples okay so okay so now what we need to do is we need to copy so what is it
+mmm puffer copy from make copy make copy of
+this looks buffer
+so this is all
+tell the transports source to fill them
+take an audio from transport source putting it in a buffer
+yeah I'm not even sure where I've got this where I actually did that bit of code from so okay so we're so we're making a copy of our buffer
+and then so I'm a little bit giving it to the stretcher to process okay so
+so are you saying to input input the regular buffer but output the temporary buffer is that what you're saying
+transport stuff transpose source I don't know
+okay so yeah so now that gets the information into the temp buffer then we copy then all right
+just trying to get all the zoom or discord call here
+let's do where's my man
+let's sorry I'm calling in I'm phoning a friend here
+oh it's normal it's normalized
+oh where how do i I don't see you oh there you are message
+oh I can't hear you in one second one second I've got a I think I've got a put you live oh there you are hey can you hear me yeah I can hear you can hear me yeah what's going on there's like there's like a lot of delay I gotta turn the YouTube audio off cuz it's quite a bit behind isn't it yeah okay but that means I can't see what you do
+oh it's a screen share on discord yeah it's so funny I don't it I don't even know if anybody else can actually hear our might just be talking to a ghost on YouTube I know it doesn't look like I can actually share them ah here we go screen - here we go this is so funny
+alright Kenny
+ah video and screen
+not supported in this browser
+let me just them let me just explain what I was trying to explain yeah so you're not using a live audio input the audio you wanna stretch comes from the transport sauce yeah yeah so so the transport sauce fills this buffer at a temporary buffer and then you pass his temporary buffer to the stretcher via process and so as you do process you keep asking the stretcher saying how much is available and as soon as you've got enough available from the stretcher to fill the output buffer you can then use retrieve to pull it and then you check that you've got enough from the retrieve to pass it to the output okay all right I might need you to repeat that again
+so okay so I have so I have the transport source right so yep so that's the source of your audio that's gonna fill this temporary buffer yep so so I call so I called get next out of your block first into the tab buffer yeah to fill it and then does it does that
+let me check there but it doesn't tell you how much it's gonna fill the get next audio block so does the audio source channel info allow you to you can say numb samples yeah so you can get so you can find the buffer from from seeing get the number of samples from the temp offer yeah
+okay so there'll be an optimization later that you can add you'll be able to ask the stretcher how many samples does it need to produce more output and then you'll be able to use that as your buffer sizes but let's not confuse things just yet okay so okay so I've got transport getting next on your block it feels now this temp buffer has got some audio in now you need to pass
+this to the stretcher so you're gonna do are be process and then get the read pointers from the temp buffer yep okay
+so let's do this comment for thank you so much for your help with this I'd be complying I promised it took him
+it took me quite a long time to get ours done by the first implementation you know it was a day yeah but then I had to spend like a couple of weeks
+actually making it do what you wanted to do
+yeah okay so so then our process so so that brings it in yep and then okay so this is the part so I got all that now this is the part that I don't quite understand so we have this we have so now yeah
+the stretch buffers got some stuff in it
+yep so we're not the right loops yet but now just you want to say how much is available from the stretcher okay yeah we've just given it some stuff once but we might have to do it again yeah
+so this is but we'll put the loop afterwards yeah okay then if there's enough available you can do this retrieve so if samples available is less than buffer gettin on samples okay I thought that was I thought that's what I was saying
+mmm
+temp of samples then we're going to retrieve it from the temp up for ya
+so where's so I got right pointers
+one seconds so now you want to use the for the less than not the temp buffer you want to check for the output buffer we've got to make sure we're filling enough for the output buffer okay so if samples available from stretcher is less than buffer getting them samples because that's the output buffer okay I'm starting to come I'm starting to come to your way of thinking now you might even want to rename the argument to the process method as an output buffer so it's obvious when you read it yes why is that not working for me
+weird auto auto output buffer samples equals what was wrong hmm what is happening here I feel like that's an erroneous error one of x codes it's because the previous line isn't finished
+oh yeah yeah sorry so so the right pointers okay so then I need em to buffer get array of pointers okay so now we need
+I'll put buffer samples the right point is it is yet not the temp buffer maybe of writing to the output buffer yeah
+do you read the read pointers
+yeah hang on let me check yeah yeah so you're writing it to the
+you're writing it to the output buffer yeah so you're getting it yes exactly so you're getting it from the transport putting it into the tosser
+that's processing it they're now putting it out to the output okay
+so then that's that's a flow transport source is going into the buffer yeah
+then you're processing the buffer
+you're either stretcher and the stretcher is gonna then write via the retrieve into the output buffer yeah so that that's it that's the flow covered of how the data moves yeah dude this the bit that's left is the samples available from stretcher won't be generally won't be enough to create output so you need a loop yeah until you've got enough available okay so we need to kind of transform the process so you're gonna have to sounds like we need a while loop yeah
+so I do yes so you want to do while available is less than output buffer that's right yeah then you're gonna need to do the whole process the transport source is gonna have to pull into the temp thing the stretch is going to process your update available and then after the while loop exits then you can retrieve okay I would have never figured this out this must have taken you an eternity so it's just um
+so basically thing that it's one of those situations where you've actually just got a walk away from it
+yeah and just think about it you know away from the code because I think the code makes it more complicated than the concept yeah
+so okay so then this is going to go outside here and also you've got to do the get next audio block in the loop because you've got to keep pulling data from the transport source yeah until you've got enough yeah so samples available from stretcher needs to go back up here then output buffer samples mmm okay so then when you after the process you probably want to clear the temp buffer as well if you need to go back to the start and right into the start yeah yeah the ten buffer clear yeah that look right this is so now this is the part that I don't how do we gonna clear it in that you need to clear it in the loop though so that when it comes back to the top and you're pulling from transport into the buffer the buffers clear and the the read pointers are at the at the start yeah okay there might be a more efficient way of just saying move the read pointers back to the start of the the buffer I don't know about that yeah that yes way yeah I get you
+so I think that might be it
+yeah come on I was going to say okay so so so it's filling filling filling then
+it comes out and then you're also in the loop you need to update samples available from stretcher so you process check are be available yeah I don't have an RV oh oh oh yeah so yes what I would do is just drop the samples available from stretcher variable and just do that I'll be available call in that the wild condition yeah you know it's it's up to you it's just a matter of taste
+yeah and then we want to check if so if okay so I'm not sure what to do next here so we have you don't need that available at the end of the layer
+okay so that should do the trick
+I'm trying to think there may be potential for an infinite loop if if the stretcher doesn't ever produce enough data to output yeah
+so that's neither though I think there's a way to check oh yes so if the transport source runs out mm-hmm
+so if there's nothing else to get from the transports or do they loop by themselves does what loop by itself the transport sauce
+meaning it next audio block or transport sources do you mean once was this finished you mean yeah
+no yeah I think you could set it to looping but oh yes gone is looping yeah guess it must be a set for that as well yeah
+stop so if what what might happen so in the in the loop yeah you want to check if the transport source is playing yeah
+or has stream finished there's a there's a method of how stream finished okay so oh so this is just to go out to exit out right I don't I don't understand what you want to do here so we're just trying to avoid the potential for an infinite loop I'm not sure the best place to put this at B but I'm put it in anywhere at the end for now I guess yeah
+another thing you know it's it's now you've got the flow then you can start you know worrying about where's the best place to check conditions of things has finished then what is it it's break right yeah that would only break out of the air
+as stream finished yeah yeah would that break out of the one now that break out of the wall yeah we will
+okay I don't think I don't think break applies to ifs yeah okay so so this RB output doesn't need to actually do anything then I say the RB output let me check that check one oh dear
+what what does the doc say what's that actual yeah obtain some some processed output data from the stretcher of the samples sample samples will be stored in the output arrays so the return value of retrieve so I think that just tells you how many how many samples it has a half yes so - sometimes it might tell you you have like X thousand of samples available but you retrieve some sometimes you might try and retrieve a certain amount but you don't get as many as you expect okay
+um but I would worry about that later so there might be certain cases where you're gonna have to make sure that you Bill bits of a buffer of silence if you didn't get as much output as you're expecting I see I see okay
+shall we just try this and see if it actually does something Oh
+okay so what do I have so we're okay nothing's happening
+okay okay so nothing's happened are you still there
+yeah I'm still here
+but anything I can I can only hear your mic here I can't hear ya
+yeah nothing nothing's come out unless unless I'm magically yeah so I think the next thing is to check what the the numbers are saying does that does the wild loop actually run yeah so let's see here
+you can always am single step the the the wild loop first time around yeah
+okay so let's see here
+so it has output and when you create the temp Buffett was that was what's the size of the temp buffer it is a create that in where is it here so total number of output channels samples per block yeah
+so let's take a look here so yeah it's still it's there
+aha
+I'll say it's the same size as I okay cool yeah so I need I need to know what are be available is that right so it's like so let's see what that comes up with
+okay so samples available is zero of course it'll be it'll just be so let's so let's see if let's just put this in here for now samples available let's run it again man I think this has been like a three hour livestream okay so let's see okay
+samples available is always zero hmm
+okay you didn't hold a sample oh yeah because nothing's going nothing's gone in - nothing's gone into the into the into the stretcher at this point has it 9 you never I mean it should up they should them if there's some stuff going into the stretcher he should update the next time it goes through the buffer so it doesn't have to do it in the loop hmm
+so is there Oh what's the what does process does process that's avoid yeah see I thought it would be something like this
+Oh cess see what the temp buffer getting on samples is as well yeah so should I keep that in the wild for now so yeah
+so I think that was 512 but let's just have a look oh he said that didn't load a sample
+oh okay so okay so that's so that's 512 so let's go back I think I made a mistake back here where I need to do samples available okay
+yeah I didn't let a sample okay but yeah that's still still zero okay but we cleared the buffer right after we process it that's the reason why when we go back through samples available there wouldn't be is that right
+this is so the reasons
+so we're clearing hmm
+so we're so we're bringing so bringing it in but we're not get get rid of the clear the thing is even if you pass the stretchers silence it should generate output
+hmm nothing we don't but we aren't actually so so we're taking it we're putting it - we're putting it to the output buffer but shouldn't we be putting it
+are we actually taking are we actually taking it and putting it
+no we're writing it to the buffer right
+so we've taken we've taken we put it we put our temp buffer into the stretcher but when we hit when we call retrieve is that actually so are we saying that we want to retrieve there's no step where we're actually taking the temp buffer and copying and copying it over to the copying it over to our regular buffer right because it goes via the stretcher so it goes in through process and out free retrieve I took retrieve from what I'm reading here too so is this
+so is it saying that we're trying to put it back through whatever we put here in output okay so there so there must be some step missing here okay so I feel like it's something here so we got so guys start so let's so let's just let's just try this right so let's just make sure that it's actually coming through the actual temp over so this should work this should just play right
+now it wouldn't play just put it into the oh we could do we could do let me just do this so what I would do
+yeah as a as a test is yeah do that then do this then step by step if you can get from transport sauce to the temp buffer and then the time temp buffer to output okay we're going from transport attempt to output fine and then final step is transport temp stretcher output so say this again so we're trying this right yeah yeah like this yeah
+okay so that works
+go ahead about I'm not sure if you can hear that or not
+I know I can't hear it yeah okay so so that worked okay so the audio goes through that fine yeah okay so we know it's going through we know that it's going in the temp buffer so the next thing is just keep feeding the stretcher but don't retrieve anything and then just check available just keep feeding the temp buffer into the stretcher and see if the available goes up okay so what should I put this outside or should I keep it inside
+yeah don't lie don't worry about a loop we're now just oh I see what you're saying
+okay so just get rid of so just get rid of all this for now and then just see if you just want to do that thing where you know because we know the temp off is okay so just keep feeding the temp buffer to the stretcher just process it and then see if available increases every time it goes through yeah if it's not then something else is happening it's weird okay this is you know this is almost identical to the code I've got yeah that works
+so then we got to get the read pointers from the temp buffa false and then we're going to query are be available okay
+and just yeah exactly
+that's it
+yeah so hug was available yeah
+so that that increases your good yeah yeah so it is increasing so yeah I I was thinking that this trance this needs to be outside okay
+so let's so okay so we're fine so far so now we introduce the while the wild loop right so while samples available is less see I thought it would be more like this
+no so
+so we got
+so now this needs to go inside
+definitely
+so I'm just going to get rid of that get rid of this so we continue to process and then just going to dbg samples available so I'm gonna put this outside of this here we go
+and interesting nothing okay that's probably an infinite loop yeah yeah so it's just getting locked in here so you need to update samples available with our be available in the loop samples
+I hear something it's is grainy okay let's have a look at what I actually did in the processing here next it sounds but there was audio yeah yeah there was there was audio it sounded it sounded like normal speed but just kind of grainy I'm just gonna do an extreme extreme okay now it's now it's flat what happened there are you alright yeah I'm just turning the YouTube audio on
+so it was like flan gene is playing yeah so don't we want this to be if rather than while
+can you hear me morph um yeah you can do that you don't want to retrieve until you know you can get enough yeah yeah you can see down here at the bottom it says 512 ring buffer warning rebuff arehd 512 accra requested only like 200 available okay
+so I'll put buffer samples as buffer get number of samples so for now what you can do if samples available is less a NAPA buffer samples and then put the retrieving and else because then you know you've got enough and then we're treating the process call like its own loop so say this again I didn't I didn't quite get what you were saying there I mean it should be it should be in a while because we need to fill the output buffer yeah
+yeah
+so so we got that that that should I don't I don't I don't quite get why it isn't working with just the while oh because it's you still need to do the get next to audio block then maybe the problem before was clearing the the temp buffer I don't know maybe something to do with transports or sir I never use it so I don't know yeah I don't know what happens to the the read pointers they always point to the start of the buffer all that worked that worked just now go on YouTube was that
+okay it was that we were clearing the buffer and that so it was a combination of we were clearing the buffer and we were in an infinite loop not a veil not updating samples available cool off anti Holloway so so I did 0.3 that's that was that supposed to be what so let me see here
+so it's plain twice as fat it sounded like it was playing like twice as fast yes I think the time goes the other way
+so 0.3 means playing 30% at the time yeah that's what I thought
+so let me rather than play it it's so it's yeah yes a play in 30% at the time not play at 30% speed
+that was weird
+so let's just if you put three two or three it should be slow
+so I put two yeah so a place twice as slow oh that was that was reverse of the way I thought it was gonna be oh that's so cool okay so now let's nellis try 0.5 right so let's try this
+so now this would pitch it up 50% so pitched it down so pitched it down I'm not sure these the the way they have a set up is there's a little bit reverse of the what so for the pitch
+well the parameters both go the opposite way
+yeah so so for the pitch going less than one pitches it down going up and going up further than one pitches it up but for let's play back right yeah yeah so so for suffer pitch it goes the way you would think it would go for time stretching it's the other way around it's the other way around so so too would be it stretched it out twice as far so it would take twice yeah yeah yeah so that is that should
+wow this is this is a hell of a livestream right here
+whoo I have a go you could a good man oh boy I don't know if I would have ever figured that out without ya you two got there me you did got there in here maybe half for sure for sure oh man thank you so much for your help man
+our my pleasure I'm glad it works yeah have fun yeah thank you very much thank you very much
+yeah I'll talk to you soon
+yeah I'll speak to you soon man thanks a lot
+take care all right well there you go
+looks like we got it looks like we got it working I'll do a I'll do a more concise tutorial at some point is anybody actually still actually watching this if you are a big shout out to you Wow
+16 people still watching whoa thank you thank you so much for hanging out thank you so much for hanging out with me and wow what a great time I'll I'll uh maybe I'll put this on github or something so so you can so people can check it out
+and actually implement it into their own codes but holy cow what a marathon session yeah thank you so much for watching and I'm gonna go grab something to eat now thank you very much and I will see you soon

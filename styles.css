@@ -1,0 +1,99 @@
+/* Audio Waveform Player Plugin Styles */
+
+.audio-player-wrapper {
+  max-width: 100%;
+  margin: 1em 0;
+}
+
+.audio-player-frame {
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease;
+}
+
+.audio-player-frame:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.waveform-container {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+
+.waveform-container:hover .waveform-svg rect {
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.playhead {
+  background: var(--text-accent) !important;
+  box-shadow: 0 0 4px var(--text-accent);
+  border-radius: 1px;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+}
+
+.play-btn, .pause-btn, .loop-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+}
+
+.play-btn:hover, .pause-btn:hover {
+  background: var(--background-modifier-hover);
+  transform: scale(1.1);
+}
+
+.loop-btn:hover {
+  background: var(--background-modifier-hover);
+  transform: scale(1.05);
+}
+
+.loop-btn.active {
+  background: var(--background-modifier-active-hover);
+  color: var(--text-accent);
+}
+
+.guitar-icon {
+  opacity: 0.7;
+}
+
+/* Dark theme adjustments */
+.theme-dark .audio-player-frame {
+  border-color: var(--background-modifier-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.theme-dark .audio-player-frame:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .audio-player-wrapper {
+    width: 100% !important;
+  }
+  
+  .controls {
+    flex-wrap: wrap;
+    gap: 0.5em;
+  }
+  
+  .waveform-svg {
+    max-width: 100%;
+    height: auto;
+  }
+}
